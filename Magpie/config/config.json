@@ -1,0 +1,286 @@
+{
+    "language": "",
+    "theme": 2,
+    "windowPos": {
+        "centerX": 542.0,
+        "centerY": 397.0,
+        "width": 980.0,
+        "height": 690.0,
+        "maximized": false
+    },
+    "shortcuts": {
+        "scale": 1146,
+        "windowedModeScale": 1147,
+        "toolbar": 3140
+    },
+    "countdownSeconds": 3,
+    "developerMode": false,
+    "debugMode": false,
+    "benchmarkMode": false,
+    "disableEffectCache": false,
+    "disableFontCache": false,
+    "saveEffectSources": false,
+    "warningsAreErrors": false,
+    "allowScalingMaximized": false,
+    "simulateExclusiveFullscreen": false,
+    "alwaysRunAsAdmin": false,
+    "showNotifyIcon": true,
+    "inlineParams": false,
+    "autoCheckForUpdates": true,
+    "checkForPreviewUpdates": false,
+    "updateCheckDate": 17887006276577075,
+    "duplicateFrameDetectionMode": 1,
+    "enableStatisticsForDynamicDetection": false,
+    "minFrameRate": 60.0,
+    "disableFP16": false,
+    "scalingModes": [
+        {
+            "name": "[PIF] 1. Pixel-Perfect (Integer 4:3)",
+            "effects": [
+                {
+                    "name": "Pixel Art\\SharpBilinear",
+                    "scalingType": 1,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[PIF] 2. Remaster MMPX (Clean HD)",
+            "effects": [
+                {
+                    "name": "Pixel Art\\MMPX",
+                    "scalingType": 0,
+                    "scale": {
+                        "x": 2.0,
+                        "y": 2.0
+                    }
+                },
+                {
+                    "name": "Pixel Art\\SharpBilinear",
+                    "scalingType": 1,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[PIF] 3. Remaster Next-Level RTX (MMPX + CAS + Vibrance)",
+            "effects": [
+                {
+                    "name": "Pixel Art\\MMPX",
+                    "scalingType": 0,
+                    "scale": {
+                        "x": 2.0,
+                        "y": 2.0
+                    }
+                },
+                {
+                    "name": "Pixel Art\\SharpBilinear",
+                    "scalingType": 1,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                {
+                    "name": "CAS\\CAS",
+                    "parameters": {
+                        "sharpness": 0.3499999940395355
+                    }
+                },
+                {
+                    "name": "ImageAdjustment",
+                    "parameters": {
+                        "saturation": 1.149999976158142,
+                        "contrast": 1.059999942779541,
+                        "brightBoost": 0.009999999776482582
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[PIF] 4. Remaster Retro CRT (MMPX + CRT)",
+            "effects": [
+                {
+                    "name": "Pixel Art\\MMPX",
+                    "scalingType": 0,
+                    "scale": {
+                        "x": 2.0,
+                        "y": 2.0
+                    }
+                },
+                {
+                    "name": "CRT\\CRT_Geom",
+                    "scalingType": 1,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    },
+                    "parameters": {
+                        "monitorGamma": 2.200000047683716,
+                        "cornerSize": 0.0010000000474974513,
+                        "curvature": 0.0,
+                        "interlace": 0.0,
+                        "CRTGamma": 1.5
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Lanczos",
+            "effects": [
+                {
+                    "name": "Lanczos",
+                    "scalingType": 1,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            ]
+        },
+        {
+            "name": "FSR",
+            "effects": [
+                {
+                    "name": "FSR\\FSR_EASU",
+                    "scalingType": 1,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                {
+                    "name": "FSR\\FSR_RCAS",
+                    "parameters": {
+                        "sharpness": 0.8700000047683716
+                    }
+                }
+            ]
+        }
+    ],
+    "profiles": [
+        {
+            "scalingMode": 2,
+            "captureMethod": 0,
+            "multiMonitorUsage": 0,
+            "initialWindowedScaleFactor": 0,
+            "customInitialWindowedScaleFactor": 1.25,
+            "graphicsCardId": {
+                "idx": -1,
+                "vendorId": 0,
+                "deviceId": 0
+            },
+            "frameRateLimiterEnabled": false,
+            "maxFrameRate": 60.0,
+            "3DGameMode": false,
+            "captureTitleBar": false,
+            "adjustCursorSpeed": true,
+            "disableDirectFlip": false,
+            "cursorScaling": 2,
+            "customCursorScaling": 1.0,
+            "cursorInterpolationMode": 0,
+            "autoHideCursorEnabled": false,
+            "autoHideCursorDelay": 3.0,
+            "croppingEnabled": false,
+            "cropping": {
+                "left": 0.0,
+                "top": 0.0,
+                "right": 0.0,
+                "bottom": 0.0
+            }
+        },
+        {
+            "name": "Pokemon Infinite Fusion (Game)",
+            "packaged": false,
+            "pathRule": "C:\\Users\\orach\\Desktop\\InfiniteFusion\\Game.exe",
+            "classNameRule": "SDL_app",
+            "launcherPath": "",
+            "autoScale": 1,
+            "launchParameters": "",
+            "scalingMode": 2,
+            "captureMethod": 0,
+            "multiMonitorUsage": 0,
+            "initialWindowedScaleFactor": 0,
+            "customInitialWindowedScaleFactor": 1.25,
+            "graphicsCardId": {
+                "idx": -1,
+                "vendorId": 0,
+                "deviceId": 0
+            },
+            "frameRateLimiterEnabled": false,
+            "maxFrameRate": 60.0,
+            "3DGameMode": false,
+            "captureTitleBar": false,
+            "adjustCursorSpeed": true,
+            "disableDirectFlip": false,
+            "cursorScaling": 2,
+            "customCursorScaling": 1.0,
+            "cursorInterpolationMode": 0,
+            "autoHideCursorEnabled": false,
+            "autoHideCursorDelay": 3.0,
+            "croppingEnabled": false,
+            "cropping": {
+                "left": 0.0,
+                "top": 0.0,
+                "right": 0.0,
+                "bottom": 0.0
+            }
+        },
+        {
+            "name": "Pokemon Infinite Fusion",
+            "packaged": false,
+            "pathRule": "C:\\Users\\orach\\Desktop\\InfiniteFusion\\InfiniteFusion.exe",
+            "classNameRule": "SDL_app",
+            "launcherPath": "",
+            "autoScale": 1,
+            "launchParameters": "",
+            "scalingMode": 2,
+            "captureMethod": 0,
+            "multiMonitorUsage": 0,
+            "initialWindowedScaleFactor": 0,
+            "customInitialWindowedScaleFactor": 1.25,
+            "graphicsCardId": {
+                "idx": -1,
+                "vendorId": 0,
+                "deviceId": 0
+            },
+            "frameRateLimiterEnabled": false,
+            "maxFrameRate": 60.0,
+            "3DGameMode": false,
+            "captureTitleBar": false,
+            "adjustCursorSpeed": true,
+            "disableDirectFlip": false,
+            "cursorScaling": 2,
+            "customCursorScaling": 1.0,
+            "cursorInterpolationMode": 0,
+            "autoHideCursorEnabled": false,
+            "autoHideCursorDelay": 3.0,
+            "croppingEnabled": false,
+            "cropping": {
+                "left": 0.0,
+                "top": 0.0,
+                "right": 0.0,
+                "bottom": 0.0
+            }
+        }
+    ],
+    "overlay": {
+        "fullscreenInitialToolbarState": 2,
+        "windowedInitialToolbarState": 2,
+        "screenshotsDir": "",
+        "windows": {
+            "profiler": {
+                "hArea": 2,
+                "vArea": 1,
+                "hPos": 60.0,
+                "vPos": 0.5
+            }
+        }
+    }
+}

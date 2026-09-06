@@ -26,6 +26,5 @@ Data/encounters_randomized.dat
 randomizer_encounters.txt
 Data/sprites/sprites_rate_limit.log
 Data/sprites/updated_spritesheets_cache
+Magpie/cache/*
 
-# Third-party tools (distributed via Releases)
-Magpie/
