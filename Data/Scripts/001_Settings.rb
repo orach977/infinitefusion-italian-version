@@ -593,10 +593,12 @@ module Settings
     :IF_KANTO => [
       ["English", "english.dat"],
       ["Français", "french.dat"],
+      ["Italiano", "italian.dat"],
     ],
     :IF_HOENN => [
       ["English", "english.dat"],
       ["Français", "french.dat"],
+      ["Italiano", "italian.dat"],
       #["Español", "spanish.dat"],
       #["中文", "chinese.dat"]
     ]

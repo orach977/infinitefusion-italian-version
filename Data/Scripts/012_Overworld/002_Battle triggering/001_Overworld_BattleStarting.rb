@@ -434,7 +434,7 @@ def pbWildBattle(species, level, outcomeVar = 1, canRun = true, canLose = false)
   species = GameData::Species.get(species).id
   dexnum = getDexNumberForSpecies(species)
   if $game_switches[SWITCH_RANDOM_WILD] #Randomized wild pokemon
-    if $game_switches[SWITCH_RANDOM_STATIC_ENCOUNTERS] && dexnum <= NB_POKEMON
+    if $game_switches[SWITCH_RANDOM_STATIC_ENCOUNTERS] && dexnum <= NB_POKEMON && (!defined?($PokemonTemp) || !$PokemonTemp || $PokemonTemp.encounterType.nil?)
       newSpecies = $PokemonGlobal.psuedoBSTHash[dexnum]
       if !newSpecies
         displayRandomizerErrorMessage()

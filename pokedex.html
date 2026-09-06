@@ -1,0 +1,965 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokédex Interattivo - Infinite Fusion Randomizer</title>
+  <style>
+    :root {
+      --bg-main: #0b0f19;
+      --bg-card: rgba(26, 34, 52, 0.75);
+      --bg-card-hover: rgba(38, 50, 77, 0.9);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #ef4444;
+      --accent-hover: #dc2626;
+      --live-green: #22c55e;
+      --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(239, 68, 68, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(56, 189, 248, 0.08) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* HEADER */
+    header {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .pokeball-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(to bottom, #ef4444 50%, #f8fafc 50%);
+      border-radius: 50%;
+      border: 3px solid #0f172a;
+      position: relative;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    }
+    .pokeball-icon::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #0f172a;
+      transform: translateY(-50%);
+    }
+    .pokeball-icon::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      background: #f8fafc;
+      border: 3px solid #0f172a;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .brand-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .live-status-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(30, 41, 59, 0.6);
+      padding: 0.45rem 1rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border-color);
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--live-green);
+      box-shadow: 0 0 8px var(--live-green);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    .pulse-dot.offline {
+      background: #f59e0b;
+      box-shadow: none;
+      animation: none;
+    }
+
+    .location-text {
+      color: var(--text-main);
+      font-weight: 700;
+      max-width: 250px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn {
+      background: #334155;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn:hover {
+      background: #475569;
+      border-color: #64748b;
+    }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    /* CONTROLS BAR */
+    .controls-wrapper {
+      max-width: 1400px;
+      margin: 1.5rem auto 0;
+      padding: 0 1.5rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 1rem;
+    }
+
+    @media (max-width: 850px) {
+      .search-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-box input, .input-box select {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem 1rem;
+      padding-left: 2.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-box input:focus, .input-box select:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 0.85rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .filter-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .filter-btn {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.35rem 0.8rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-btn:hover {
+      background: rgba(51, 65, 85, 0.7);
+      color: var(--text-main);
+    }
+    .filter-btn.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      font-weight: 600;
+    }
+
+    /* MAIN CONTENT */
+    main {
+      max-width: 1400px;
+      margin: 1.5rem auto 3rem;
+      padding: 0 1.5rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    .zone-banner {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .zone-title-group h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .zone-meta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .encounter-group {
+      margin-bottom: 2.5rem;
+    }
+
+    .encounter-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .encounter-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-land { background: #065f46; color: #6ee7b7; border: 1px solid #059669; }
+    .badge-water { background: #1e3a8a; color: #93c5fd; border: 1px solid #2563eb; }
+    .badge-oldrod { background: #7c2d12; color: #fdba74; border: 1px solid #ea580c; }
+    .badge-goodrod { background: #164e63; color: #67e8f9; border: 1px solid #0891b2; }
+    .badge-superrod { background: #581c87; color: #d8b4fe; border: 1px solid #9333ea; }
+    .badge-cave { background: #78350f; color: #fcd34d; border: 1px solid #d97706; }
+    .badge-other { background: #334155; color: #cbd5e1; border: 1px solid #64748b; }
+
+    .pokemon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.15rem;
+    }
+
+    .pokemon-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(8px);
+    }
+
+    .pokemon-card:hover {
+      transform: translateY(-4px);
+      background: var(--bg-card-hover);
+      border-color: var(--border-glow);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4), 0 0 15px rgba(56, 189, 248, 0.15);
+    }
+
+    .sprite-wrapper {
+      width: 72px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+
+    .pokemon-sprite {
+      max-width: 68px;
+      max-height: 68px;
+      image-rendering: pixelated;
+      transition: transform 0.2s ease;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+    }
+
+    .pokemon-card:hover .pokemon-sprite {
+      transform: scale(1.15);
+    }
+
+    .pokemon-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.35rem;
+      line-height: 1.2;
+    }
+
+    .pokemon-types {
+      display: flex;
+      gap: 0.35rem;
+      justify-content: center;
+      margin-bottom: 0.65rem;
+    }
+
+    .type-pill {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+    }
+
+    .level-badge {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #38bdf8;
+      width: 100%;
+      margin-top: auto;
+    }
+
+    /* SEARCH RESULTS SECTION (REVERSE SEARCH) */
+    .reverse-results-container {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border-glow);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .reverse-results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .reverse-item {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .reverse-item:hover {
+      background: rgba(51, 65, 85, 0.8);
+      border-color: #38bdf8;
+      transform: translateX(4px);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: var(--bg-card);
+      border-radius: 14px;
+      border: 1px dashed var(--border-color);
+    }
+
+    .empty-state h3 {
+      font-size: 1.4rem;
+      margin-bottom: 0.75rem;
+      color: #e2e8f0;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      max-width: 500px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.6;
+    }
+
+    /* TYPE COLORS */
+    .type-NORMAL { background-color: #9fa19f; }
+    .type-FIRE { background-color: #e62829; }
+    .type-WATER { background-color: #2980ef; }
+    .type-GRASS { background-color: #3fa129; }
+    .type-ELECTRIC { background-color: #fac000; color: #1e293b !important; text-shadow: none !important; }
+    .type-ICE { background-color: #3dcef3; color: #1e293b !important; text-shadow: none !important; }
+    .type-FIGHTING { background-color: #ff8000; }
+    .type-POISON { background-color: #9141cb; }
+    .type-GROUND { background-color: #915121; }
+    .type-FLYING { background-color: #81b9ef; }
+    .type-PSYCHIC { background-color: #ef4179; }
+    .type-BUG { background-color: #91a119; }
+    .type-ROCK { background-color: #afa981; }
+    .type-GHOST { background-color: #704170; }
+    .type-DRAGON { background-color: #5060e1; }
+    .type-DARK { background-color: #50413f; }
+    .type-STEEL { background-color: #60a1b8; }
+    .type-FAIRY { background-color: #ef70ef; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand-container">
+      <div class="pokeball-icon"></div>
+      <div>
+        <div class="brand-title">Infinite Fusion Dex</div>
+        <div class="brand-subtitle" id="save-info-badge">Wild Randomizer: Area Tracker</div>
+      </div>
+    </div>
+
+    <!-- LIVE STATUS BAR -->
+    <div class="live-status-bar">
+      <div class="live-indicator">
+        <div class="pulse-dot" id="sync-dot"></div>
+        <span id="sync-label">Posizione Live:</span>
+        <span class="location-text" id="current-map-badge">In attesa del gioco...</span>
+      </div>
+      <button class="btn" id="btn-toggle-sync" onclick="toggleAutoSync()">Auto-sync: ON</button>
+      <button class="btn" onclick="forceRefresh()" title="Forza aggiornamento posizione e dati">🔄</button>
+    </div>
+  </header>
+
+  <!-- CONTROLS -->
+  <div class="controls-wrapper">
+    <div class="search-row">
+      <!-- MAP SELECTOR -->
+      <div class="input-box">
+        <span class="input-icon">📍</span>
+        <select id="map-select" onchange="onManualMapSelect()">
+          <option value="">Caricamento mappe in corso...</option>
+        </select>
+      </div>
+
+      <!-- REVERSE POKEMON SEARCH -->
+      <div class="input-box">
+        <span class="input-icon">🔍</span>
+        <input type="text" id="pokemon-search" placeholder="Dove trovo...? (es. Pikachu, Gengar, Lapras)" oninput="onPokemonSearch(this.value)">
+      </div>
+
+      <!-- QUICK ACTION: GO TO CURRENT LOCATION -->
+      <button class="btn btn-primary" onclick="goToCurrentLocation()">📍 Torna alla Mia Posizione</button>
+    </div>
+
+    <!-- FILTER BUTTONS -->
+    <div class="filter-tags">
+      <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Filtra per habitat:</span>
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">Tutti</button>
+      <button class="filter-btn" data-filter="Land" onclick="setFilter('Land', this)">🌿 Erba / Terra</button>
+      <button class="filter-btn" data-filter="Water" onclick="setFilter('Water', this)">🌊 Acqua / Surf</button>
+      <button class="filter-btn" data-filter="Fishing" onclick="setFilter('Fishing', this)">🎣 Pesca</button>
+      <button class="filter-btn" data-filter="Cave" onclick="setFilter('Cave', this)">🪨 Grotta / Roccia</button>
+    </div>
+  </div>
+
+  <!-- MAIN VIEW -->
+  <main id="main-container">
+    <!-- REVERSE SEARCH RESULTS (HIDDEN BY DEFAULT) -->
+    <div id="reverse-search-results" class="reverse-results-container" style="display: none;">
+      <div class="reverse-results-header">
+        <h2 id="reverse-search-title">Risultati ricerca</h2>
+        <button class="btn" onclick="closeReverseSearch()">✕ Chiudi</button>
+      </div>
+      <div id="reverse-search-list"></div>
+    </div>
+
+    <!-- MAP BANNER -->
+    <div class="zone-banner" id="zone-banner">
+      <div class="zone-title-group">
+        <h1 id="zone-display-name">Caricamento incontri...</h1>
+        <div class="zone-meta">
+          <span id="zone-map-id-label">Map ID: --</span>
+          <span>•</span>
+          <span id="zone-count-label">0 specie disponibili</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENCOUNTERS CONTAINER -->
+    <div id="encounters-container">
+      <!-- Dynamically filled with encounter categories & cards -->
+    </div>
+  </main>
+
+  <footer>
+    Pokédex Interattivo Pokémon Infinite Fusion • Sincronizzazione automatica con il salvataggio attivo.
+  </footer>
+
+  <!-- DYNAMIC DATA SCRIPTS -->
+  <script src="randomizer_data.js"></script>
+  <script src="current_location.js"></script>
+
+  <script>
+    let activeMapId = null;
+    let autoSyncEnabled = true;
+    let pollInterval = null;
+    let currentFilter = 'all';
+
+    // Type Color Dictionary
+    const TYPE_NAMES_IT = {
+      NORMAL: 'Normale', FIRE: 'Fuoco', WATER: 'Acqua', GRASS: 'Erba',
+      ELECTRIC: 'Elettro', ICE: 'Ghiaccio', FIGHTING: 'Lotta', POISON: 'Veleno',
+      GROUND: 'Terra', FLYING: 'Volante', PSYCHIC: 'Psico', BUG: 'Coleottero',
+      ROCK: 'Roccia', GHOST: 'Spettro', DRAGON: 'Drago', DARK: 'Buio',
+      STEEL: 'Acciaio', FAIRY: 'Folletto'
+    };
+
+    const ENCOUNTER_NAMES_IT = {
+      Land: 'Erba / Terra',
+      LandDay: 'Erba (Giorno)',
+      LandNight: 'Erba (Notte)',
+      LandMorning: 'Erba (Mattina)',
+      Water: 'Acqua / Surf',
+      OldRod: 'Amo Vecchio',
+      GoodRod: 'Amo Buono',
+      SuperRod: 'Super Amo',
+      Cave: 'Caverna',
+      RockSmash: 'Spaccaroccia',
+      HeadbuttLow: 'Bottintesta',
+      HeadbuttHigh: 'Bottintesta (Rari)',
+      BugContest: 'Gara Pigliamosche'
+    };
+
+    function getEncounterBadgeClass(type) {
+      if (type.startsWith('Land')) return 'badge-land';
+      if (type === 'Water') return 'badge-water';
+      if (type === 'OldRod') return 'badge-oldrod';
+      if (type === 'GoodRod') return 'badge-goodrod';
+      if (type === 'SuperRod') return 'badge-superrod';
+      if (type.startsWith('Cave')) return 'badge-cave';
+      return 'badge-other';
+    }
+
+    // Initialize App
+    function init() {
+      populateMapSelector();
+      
+      // Determine initial location
+      if (window.CURRENT_LOCATION && window.CURRENT_LOCATION.map_id) {
+        activeMapId = window.CURRENT_LOCATION.map_id.toString();
+        updateLocationBadge(window.CURRENT_LOCATION.map_name, window.CURRENT_LOCATION.map_id);
+      } else if (window.RANDOMIZER_DATA && window.RANDOMIZER_DATA.maps) {
+        const firstMapId = Object.keys(window.RANDOMIZER_DATA.maps)[0];
+        activeMapId = firstMapId;
+      }
+
+      if (window.RANDOMIZER_DATA && window.RANDOMIZER_DATA.trainer) {
+        document.getElementById('save-info-badge').innerText = 
+          'Salvataggio: ' + window.RANDOMIZER_DATA.trainer + ' | Randomizer Wild: Area';
+      }
+
+      if (activeMapId) {
+        renderMap(activeMapId);
+        document.getElementById('map-select').value = activeMapId;
+      } else {
+        renderEmptyState();
+      }
+
+      // Start Polling for location updates
+      startPolling();
+    }
+
+    function populateMapSelector() {
+      const select = document.getElementById('map-select');
+      select.innerHTML = '';
+
+      if (!window.RANDOMIZER_DATA || !window.RANDOMIZER_DATA.maps) {
+        select.innerHTML = '<option value="">Nessun dato randomizer trovato</option>';
+        return;
+      }
+
+      const maps = Object.values(window.RANDOMIZER_DATA.maps);
+      // Sort numerically by map ID
+      maps.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+
+      maps.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id.toString();
+        opt.textContent = 'Map ' + m.id + ': ' + m.name;
+        select.appendChild(opt);
+      });
+    }
+
+    function renderMap(mapId) {
+      if (!window.RANDOMIZER_DATA || !window.RANDOMIZER_DATA.maps) {
+        renderEmptyState();
+        return;
+      }
+
+      const mapData = window.RANDOMIZER_DATA.maps[mapId.toString()];
+      const container = document.getElementById('encounters-container');
+      const title = document.getElementById('zone-display-name');
+      const mapIdLabel = document.getElementById('zone-map-id-label');
+      const countLabel = document.getElementById('zone-count-label');
+
+      if (!mapData) {
+        title.innerText = 'Mappa ID: ' + mapId;
+        mapIdLabel.innerText = 'Map ID: ' + mapId;
+        countLabel.innerText = 'Nessun incontro registrato in questa mappa';
+        container.innerHTML = '<div class="empty-state"><h3>Nessun Pokémon selvatico registrato qui</h3><p>Questa mappa (ID: ' + mapId + ') non contiene incontri selvatici o è un interno/città.</p></div>';
+        return;
+      }
+
+      title.innerHTML = '<span>📍</span> ' + mapData.name;
+      mapIdLabel.innerText = 'Map ID: ' + mapData.id;
+
+      container.innerHTML = '';
+      let totalSpecies = 0;
+
+      const encounterTypes = Object.keys(mapData.encounters || {});
+
+      encounterTypes.forEach(typeKey => {
+        const list = mapData.encounters[typeKey];
+        if (!list || list.length === 0) return;
+
+        // Apply filter
+        if (currentFilter !== 'all') {
+          if (currentFilter === 'Fishing' && !['OldRod', 'GoodRod', 'SuperRod'].includes(typeKey)) return;
+          if (currentFilter === 'Land' && !typeKey.startsWith('Land')) return;
+          if (currentFilter === 'Water' && typeKey !== 'Water') return;
+          if (currentFilter === 'Cave' && !typeKey.startsWith('Cave') && typeKey !== 'RockSmash') return;
+        }
+
+        totalSpecies += list.length;
+
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'encounter-group';
+
+        const typeTitle = ENCOUNTER_NAMES_IT[typeKey] || typeKey;
+        const badgeClass = getEncounterBadgeClass(typeKey);
+
+        groupDiv.innerHTML = '<div class="encounter-header"><span>' + typeTitle + '</span><span class="encounter-badge ' + badgeClass + '">' + typeKey + ' (' + list.length + ')</span></div><div class="pokemon-grid"></div>';
+
+        const grid = groupDiv.querySelector('.pokemon-grid');
+
+        list.forEach(pk => {
+          const card = document.createElement('div');
+          card.className = 'pokemon-card';
+
+          const lvlText = pk.min_lvl === pk.max_lvl ? ('Lv. ' + pk.min_lvl) : ('Lv. ' + pk.min_lvl + ' - ' + pk.max_lvl);
+          const t1Name = TYPE_NAMES_IT[pk.type1] || pk.type1;
+          const t2Name = pk.type2 ? (TYPE_NAMES_IT[pk.type2] || pk.type2) : null;
+
+          // Local icon path with Showdown animated fallback
+          const localIconPath = pk.icon || ('Graphics/Pokemon/Icons/' + pk.species + '.png');
+          const cleanName = pk.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+          const showdownFallback = 'https://play.pokemonshowdown.com/sprites/dex/' + cleanName + '.png';
+          const pokeApiFallback = pk.dex_number > 0 ? ('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + pk.dex_number + '.png') : '';
+
+          card.innerHTML = 
+            '<div class="sprite-wrapper">' +
+              '<img class="pokemon-sprite" src="' + localIconPath + '" alt="' + pk.name + '" ' +
+              'onerror="this.onerror=null; this.src=\'' + (pokeApiFallback || showdownFallback) + '\';">' +
+            '</div>' +
+            '<div class="pokemon-name">' + pk.name + '</div>' +
+            '<div class="pokemon-types">' +
+              '<span class="type-pill type-' + pk.type1 + '">' + t1Name + '</span>' +
+              (pk.type2 ? ('<span class="type-pill type-' + pk.type2 + '">' + t2Name + '</span>') : '') +
+            '</div>' +
+            '<div class="level-badge">' + lvlText + '</div>';
+          grid.appendChild(card);
+        });
+
+        container.appendChild(groupDiv);
+      });
+
+      countLabel.innerText = totalSpecies + ' specie visibili';
+
+      if (totalSpecies === 0) {
+        container.innerHTML = '<div class="empty-state"><h3>Nessun Pokémon corrisponde al filtro attivo</h3><p>Prova a selezionare "Tutti" per visualizzare tutti gli habitat disponibili in questa zona.</p></div>';
+      }
+    }
+
+    function renderEmptyState() {
+      const container = document.getElementById('encounters-container');
+      container.innerHTML = '<div class="empty-state"><h3>In attesa dei dati dal gioco...</h3><p>1. Apri <strong>Pokémon Infinite Fusion</strong>.<br>2. Carica la tua partita salvata.<br>3. I dati e la posizione si aggiorneranno automaticamente!</p></div>';
+    }
+
+    // MAP SELECTION
+    function onManualMapSelect() {
+      const select = document.getElementById('map-select');
+      const val = select.value;
+      if (val) {
+        activeMapId = val;
+        renderMap(val);
+      }
+    }
+
+    function goToCurrentLocation() {
+      if (window.CURRENT_LOCATION && window.CURRENT_LOCATION.map_id) {
+        activeMapId = window.CURRENT_LOCATION.map_id.toString();
+        document.getElementById('map-select').value = activeMapId;
+        renderMap(activeMapId);
+      }
+    }
+
+    // REVERSE POKEMON SEARCH
+    function onPokemonSearch(query) {
+      query = query.trim().toLowerCase();
+      const resultsDiv = document.getElementById('reverse-search-results');
+      const listDiv = document.getElementById('reverse-search-list');
+      const title = document.getElementById('reverse-search-title');
+
+      if (!query || query.length < 2) {
+        resultsDiv.style.display = 'none';
+        return;
+      }
+
+      if (!window.RANDOMIZER_DATA || !window.RANDOMIZER_DATA.maps) return;
+
+      const matches = [];
+
+      Object.values(window.RANDOMIZER_DATA.maps).forEach(map => {
+        Object.entries(map.encounters || {}).forEach(([encType, pkList]) => {
+          pkList.forEach(pk => {
+            if (pk.name.toLowerCase().includes(query) || pk.species.toLowerCase().includes(query)) {
+              matches.push({
+                mapId: map.id,
+                mapName: map.name,
+                encounterType: encType,
+                pokemon: pk
+              });
+            }
+          });
+        });
+      });
+
+      title.innerText = 'Trovato in ' + matches.length + ' aree per: "' + query + '"';
+      listDiv.innerHTML = '';
+
+      if (matches.length === 0) {
+        listDiv.innerHTML = '<div style="color: var(--text-muted); padding: 1rem;">Nessun Pokémon trovato con questo nome nel tuo Randomizer.</div>';
+      } else {
+        matches.slice(0, 50).forEach(m => {
+          const item = document.createElement('div');
+          item.className = 'reverse-item';
+          const lvlText = m.pokemon.min_lvl === m.pokemon.max_lvl ? ('Lv. ' + m.pokemon.min_lvl) : ('Lv. ' + m.pokemon.min_lvl + '-' + m.pokemon.max_lvl);
+          const encName = ENCOUNTER_NAMES_IT[m.encounterType] || m.encounterType;
+
+          item.innerHTML = 
+            '<div style="display: flex; align-items: center; gap: 0.85rem;">' +
+              '<img src="' + m.pokemon.icon + '" style="width: 32px; height: 32px; image-rendering: pixelated;" onerror="this.style.display=\'none\'">' +
+              '<div>' +
+                '<strong style="color: #ffffff;">' + m.pokemon.name + '</strong> ' +
+                '<span style="color: var(--text-muted); font-size: 0.85rem;">su <strong>' + m.mapName + '</strong> (Map ' + m.mapId + ')</span>' +
+              '</div>' +
+            '</div>' +
+            '<div style="display: flex; align-items: center; gap: 0.75rem;">' +
+              '<span class="encounter-badge ' + getEncounterBadgeClass(m.encounterType) + '">' + encName + '</span>' +
+              '<span style="color: #38bdf8; font-weight: 700; font-size: 0.85rem;">' + lvlText + '</span>' +
+            '</div>';
+          item.onclick = () => {
+            activeMapId = m.mapId.toString();
+            document.getElementById('map-select').value = activeMapId;
+            renderMap(activeMapId);
+            closeReverseSearch();
+            window.scrollTo({ top: 180, behavior: 'smooth' });
+          };
+          listDiv.appendChild(item);
+        });
+      }
+
+      resultsDiv.style.display = 'block';
+    }
+
+    function closeReverseSearch() {
+      document.getElementById('reverse-search-results').style.display = 'none';
+      document.getElementById('pokemon-search').value = '';
+    }
+
+    // FILTERS
+    function setFilter(filter, el) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+      if (activeMapId) renderMap(activeMapId);
+    }
+
+    // LIVE POLLING MECHANISM
+    function updateLocationBadge(name, id) {
+      document.getElementById('current-map-badge').innerText = name + ' (Map ' + id + ')';
+      document.getElementById('sync-dot').classList.remove('offline');
+    }
+
+    function pollLocation() {
+      if (!autoSyncEnabled) return;
+
+      const script = document.createElement('script');
+      script.src = 'current_location.js?t=' + Date.now();
+      script.onload = () => {
+        script.remove();
+        if (window.CURRENT_LOCATION) {
+          const loc = window.CURRENT_LOCATION;
+          updateLocationBadge(loc.map_name, loc.map_id);
+
+          if (loc.map_id && loc.map_id.toString() !== activeMapId) {
+            activeMapId = loc.map_id.toString();
+            document.getElementById('map-select').value = activeMapId;
+            renderMap(activeMapId);
+          }
+        }
+      };
+      script.onerror = () => {
+        script.remove();
+      };
+      document.head.appendChild(script);
+    }
+
+    function pollDataUpdates() {
+      const script = document.createElement('script');
+      script.src = 'randomizer_data.js?t=' + Date.now();
+      script.onload = () => {
+        script.remove();
+        populateMapSelector();
+        if (activeMapId) renderMap(activeMapId);
+      };
+      script.onerror = () => script.remove();
+      document.head.appendChild(script);
+    }
+
+    function startPolling() {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(() => {
+        pollLocation();
+      }, 2000);
+    }
+
+    function toggleAutoSync() {
+      autoSyncEnabled = !autoSyncEnabled;
+      const btn = document.getElementById('btn-toggle-sync');
+      const dot = document.getElementById('sync-dot');
+      if (autoSyncEnabled) {
+        btn.innerText = 'Auto-sync: ON';
+        btn.classList.remove('btn-primary');
+        dot.classList.remove('offline');
+        pollLocation();
+      } else {
+        btn.innerText = 'Auto-sync: PAUSA';
+        btn.classList.add('btn-primary');
+        dot.classList.add('offline');
+      }
+    }
+
+    function forceRefresh() {
+      pollDataUpdates();
+      pollLocation();
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

@@ -127,12 +127,14 @@ class PokemonPauseMenu
     cmdDebug = -1
     cmdQuit = -1
     cmdEndGame = -1
+    cmdHabitatRadar = -1
     if $Trainer.has_pokedex && $Trainer.pokedex.accessible_dexes.length > 0
       commands[cmdPokedex = commands.length] = "  <icon=#{ICON_POKEDEX}>  " + _INTL("Pokédex")
     end
     commands[cmdPokemon = commands.length] = "  <icon=#{ICON_POKEMON}>  " + _INTL("Pokémon") if $Trainer.party_count > 0
     commands[cmdBag = commands.length] = "  <icon=#{ICON_BAG}>  " + _INTL("Bag") if !pbInBugContest?
     commands[cmdPokegear = commands.length] = "  <icon=#{ICON_POKENAV}>  " + _INTL("PokéNav") if $Trainer.has_pokegear
+    commands[cmdHabitatRadar = commands.length] = "  <icon=#{ICON_POKENAV}>  " + _INTL("Radar Habitat")
     commands[cmdTrainer = commands.length] = "  <icon=#{ICON_PLAYER}>  " + _INTL("{1}", $Trainer.name)
     commands[cmdOutfit = commands.length] = "  <icon=#{ICON_OUTFIT}>  " + _INTL("Outfit") if $Trainer.can_change_outfit
     if pbInSafari?
@@ -226,6 +228,16 @@ class PokemonPauseMenu
           # @scene.pbRefresh
           # @scene.pbHideMenu
           # @scene.pbEndScene
+        }
+      elsif cmdHabitatRadar >= 0 && command == cmdHabitatRadar
+        pbPlayDecisionSE
+        pbFadeOutIn {
+          @scene.pbHideMenu
+          scene = PokemonHabitatRadar_Scene.new
+          screen = PokemonHabitatRadarScreen.new(scene)
+          screen.pbStartScreen
+          @scene.pbRefresh
+          @scene.pbShowMenu
         }
       elsif cmdTrainer >= 0 && command == cmdTrainer
         pbPlayDecisionSE

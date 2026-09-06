@@ -25,6 +25,17 @@ class SystemOptionsScene < PokemonOption_Scene
 
   def pbGetOptions(inloadscreen = false)
     options = []
+    if Settings::LANGUAGES[Settings::GAME_ID] && Settings::LANGUAGES[Settings::GAME_ID].length >= 2
+      options << EnumOption.new(_INTL("Language"),
+                                Settings::LANGUAGES[Settings::GAME_ID].map { |lang| lang[0] },
+                                proc { $PokemonSystem.language || 0 },
+                                proc { |value|
+                                  $PokemonSystem.language = value
+                                  pbLoadMessages("Data/" + Settings::LANGUAGES[Settings::GAME_ID][value][1])
+                                },
+                                _INTL("Sets the game language")
+      )
+    end
     options << EnumOption.new(_INTL("Text Entry"), [_INTL("Cursor"), _INTL("Keyboard")],
                               proc { $PokemonSystem.textinput },
                               proc { |value| $PokemonSystem.textinput = value },

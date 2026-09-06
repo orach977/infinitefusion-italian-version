@@ -3,6 +3,7 @@ Graphics/Battlers/Shiny/*
 
 Graphics/CustomBattlers/spritesheets/*
 Graphics/CustomBattlers/*
+Graphics/Pokemon/FusionIcons/*
 Data/VERSION
 infinitefusion.sh
 .gitignore
@@ -10,3 +11,21 @@ Game.rxproj
 .DS_Store
 PBS/*
 rpgmaker.sh
+
+# Backups & Large Archives
+BACKUP_*
+*.zip
+*.bak
+
+# Logs & Runtime Caches
+*.log
+last_encounter_log.txt
+.kilo/
+translation_check/
+Data/encounters_randomized.dat
+randomizer_encounters.txt
+Data/sprites/sprites_rate_limit.log
+Data/sprites/updated_spritesheets_cache
+
+# Third-party tools (distributed via Releases)
+Magpie/

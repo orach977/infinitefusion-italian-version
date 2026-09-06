@@ -291,6 +291,8 @@ module GameData
         return GameData::SPLIT_NAMES_FRENCH
       when :CHINESE
         return GameData::SPLIT_NAMES_CHINESE
+      when :ITALIAN
+        return GameData::SPLIT_NAMES
       end
       return GameData::SPLIT_NAMES
     end

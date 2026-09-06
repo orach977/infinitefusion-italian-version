@@ -49,6 +49,7 @@ def pbCallTitle
 end
 
 def mainFunction
+  $DEBUG = true
   if $DEBUG
     pbCriticalCode { mainFunctionDebug }
   else
@@ -56,6 +57,7 @@ def mainFunction
   end
   return 1
 end
+
 
 def clearTempFolder()
   folder_path = Settings::DOWNLOADED_SPRITES_FOLDER

@@ -5,7 +5,8 @@ LOCALIZABLE_GRAPHICS_REGEX = /Graphics\/(#{LOCALIZABLE_GRAPHICS_FOLDERS.map { |f
 LOCALIZED_GRAPHICS_FOLDERS = {
   :FRENCH  => "Graphics/Localized/fr",
   :SPANISH => "Graphics/Localized/es",
-  :CHINESE => "Graphics/Localized/zh"
+  :CHINESE => "Graphics/Localized/zh",
+  :ITALIAN => "Graphics/Localized/it"
 }
 
 def pbLocalizedBitmapFilename(original_filename)
@@ -48,6 +49,8 @@ def getCurrentLanguage
     return :SPANISH
   when "chinese.dat"
     return :CHINESE
+  when "italian.dat"
+    return :ITALIAN
   end
   return :ENGLISH
 end
