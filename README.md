@@ -12,6 +12,7 @@
 
 - [Cos'è questo progetto](#-cosè-questo-progetto)
 - [Funzionalità esclusive](#-funzionalità-esclusive)
+- [Traduzione Italiana — Dialoghi e Mosse](#-traduzione-italiana--dialoghi-e-mosse)
 - [Requisiti](#-requisiti)
 - [Installazione da zero](#-installazione-da-zero)
 - [Aggiornamento](#-aggiornamento)
@@ -49,6 +50,26 @@ Questa versione aggiunge:
 | 📖 **Pokédex HTML** | Pagina HTML offline con dati di tutti i 576 Pokémon base, apribile nel browser |
 | 🎨 **Remaster grafico** | Launcher con Magpie integrato per upscaling in tempo reale (ALT+F11) |
 | 🎲 **Randomizer** | Supporto completo per le modalità randomizzate del gioco |
+
+---
+
+## 🇮🇹 Traduzione Italiana — Dialoghi e Mosse
+
+Questa versione include la localizzazione completa in italiano di ogni aspetto dell'avventura:
+
+### ⚔️ Battaglie, Mosse e Tipi in Italiano
+Tutti i nomi delle mosse, i tipi di appartenenza, i valori di PP e i messaggi in battaglia sono tradotti:
+
+<p align="center">
+  <img src="docs/screenshots/battaglia_mosse_it.png" alt="Battaglia con mosse in italiano" width="85%">
+</p>
+
+### 💬 Dialoghi, Trama e PNG
+I dialoghi della storia, i testi dei capipalestra, le missioni secondarie e l'intera storyline del Team Rocket sono completamente in italiano:
+
+<p align="center">
+  <img src="docs/screenshots/dialogo_storia_it.png" alt="Dialoghi e storia in italiano" width="85%">
+</p>
 
 ---
 
