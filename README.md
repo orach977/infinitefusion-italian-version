@@ -65,10 +65,17 @@ Tutti i nomi delle mosse, i tipi di appartenenza, i valori di PP e i messaggi in
 </p>
 
 ### 💬 Dialoghi, Trama e PNG
-I dialoghi della storia, i testi dei capipalestra, le missioni secondarie e l'intera storyline del Team Rocket sono completamente in italiano:
+I dialoghi della storia, i testi dei capipalestra, le missioni secondarie e le interazioni nell'overworld sono completamente in italiano:
 
 <p align="center">
   <img src="docs/screenshots/dialogo_storia_it.png" alt="Dialoghi e storia in italiano" width="85%">
+</p>
+
+### 📖 Pokédex In-Game Tradotto
+Le voci del Pokédex con descrizioni originali e curiosità tradotte in italiano:
+
+<p align="center">
+  <img src="docs/screenshots/pokedex_ingame_it.png" alt="Pokédex in-game in italiano" width="85%">
 </p>
 
 ---
@@ -159,7 +166,11 @@ Il **Radar Habitat** è uno strumento esclusivo di questa versione, accessibile 
 
 ### Come aprirlo
 1. Premi **X** o **Esc** durante il gioco per aprire il menù di pausa
-2. Seleziona **"Radar Habitat"**
+2. Seleziona la voce **"Radar Habitat"**
+
+<p align="center">
+  <img src="docs/screenshots/menu_pausa_it.png" alt="Menu di Pausa con Radar Habitat" width="35%">
+</p>
 
 ### Interfaccia
 

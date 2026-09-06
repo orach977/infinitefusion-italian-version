@@ -1,1 +1,1 @@
-window.CURRENT_LOCATION = {"map_id":337,"map_name":"Palestra di Azalina","timestamp":1788706959};
+window.CURRENT_LOCATION = {"map_id":413,"map_name":"Percorso 7","timestamp":1788716749};
