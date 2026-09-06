@@ -2,6 +2,10 @@
 
 > Fork italiano di [Pokémon Infinite Fusion](https://github.com/infinitefusion/infinitefusion-e18) con localizzazione completa, strumenti esclusivi e upscaling grafico.
 
+<p align="center">
+  <img src="docs/screenshots/fusions_showcase.png" alt="Pokémon Infinite Fusion Showcase" width="90%">
+</p>
+
 ---
 
 ## 📋 Sommario
@@ -138,6 +142,10 @@ Il **Radar Habitat** è uno strumento esclusivo di questa versione, accessibile 
 
 ### Interfaccia
 
+<p align="center">
+  <img src="docs/screenshots/radar_habitat.png" alt="Radar Habitat In-Game UI" width="85%">
+</p>
+
 L'interfaccia è divisa in 4 aree:
 
 | Area | Contenuto |
@@ -186,11 +194,16 @@ L'interfaccia è divisa in 4 aree:
 
 ## 📖 Pokédex HTML offline
 
-Il file **`pokedex.html`** nella cartella del gioco è un Pokédex consultabile nel browser:
+Il file **`pokedex.html`** nella cartella del gioco è un Pokédex interattivo consultabile direttamente nel browser:
+
+<p align="center">
+  <img src="docs/screenshots/pokedex_web.png" alt="Pokédex Web Interface" width="90%">
+</p>
 
 1. Fai doppio click su `pokedex.html`
 2. Si aprirà nel tuo browser predefinito
-3. Puoi cercare, filtrare e consultare i dati di tutti i 576 Pokémon base
+3. Puoi cercare per nome, filtrare per habitat (Erba, Acqua, Pesca, Grotta), e sincronizzare la posizione in tempo reale!
+4. Include tutti i **576 Pokémon base** e le loro statistiche complete.
 
 > 💡 Funziona completamente offline, non serve connessione internet.
 
