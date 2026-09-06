@@ -25,7 +25,7 @@
 
 ## 🎮 Cos'è questo progetto
 
-Pokémon Infinite Fusion è un fan game gratuito basato su RPG Maker XP che permette di **fondere qualsiasi coppia di Pokémon** tra le prime 6 generazioni (oltre 176.000 combinazioni possibili!).
+Pokémon Infinite Fusion è un fan game gratuito basato su RPG Maker XP che permette di **fondere qualsiasi coppia di Pokémon** tra le generazioni 1-7+ (**576 Pokémon base**, per oltre **331.000 combinazioni di fusioni possibili**!).
 
 Questa versione aggiunge:
 - **Traduzione italiana** completa dei menù e dell'interfaccia
@@ -42,7 +42,7 @@ Questa versione aggiunge:
 |---|---|
 | 🇮🇹 **Localizzazione IT** | Interfaccia di gioco tradotta in italiano |
 | 📡 **Radar Habitat** | Menu completo con lista selvatici per mappa, statistiche base, tipi, rarità, percentuali di incontro, ricerca globale e sistema GPS di tracciamento |
-| 📖 **Pokédex HTML** | Pagina HTML offline con dati di tutti i 420 Pokémon base, apribile nel browser |
+| 📖 **Pokédex HTML** | Pagina HTML offline con dati di tutti i 576 Pokémon base, apribile nel browser |
 | 🎨 **Remaster grafico** | Launcher con Magpie integrato per upscaling in tempo reale (ALT+F11) |
 | 🎲 **Randomizer** | Supporto completo per le modalità randomizzate del gioco |
 
@@ -190,7 +190,7 @@ Il file **`pokedex.html`** nella cartella del gioco è un Pokédex consultabile 
 
 1. Fai doppio click su `pokedex.html`
 2. Si aprirà nel tuo browser predefinito
-3. Puoi cercare, filtrare e consultare i dati di tutti i 420 Pokémon base
+3. Puoi cercare, filtrare e consultare i dati di tutti i 576 Pokémon base
 
 > 💡 Funziona completamente offline, non serve connessione internet.
 
