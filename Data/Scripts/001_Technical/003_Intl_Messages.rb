@@ -631,12 +631,17 @@ class Messages
     return @messages[type].length
   end
 
+  def self.sanitizeString(str)
+    return str unless str.is_a?(String)
+    return str.gsub("\u2019", "'").gsub("\u2018", "'").gsub("\u201C", '"').gsub("\u201D", '"')
+  end
+
   def get(type, id)
     delayedLoad
     return "" if !@messages
     return "" if !@messages[type]
     return "" if !@messages[type][id]
-    return @messages[type][id]
+    return Messages.sanitizeString(@messages[type][id])
   end
 
   def getFromHash(type, key)
@@ -644,7 +649,7 @@ class Messages
     return key if !@messages || !@messages[type] || !key
     id = Messages.stringToKey(key)
     return key if !@messages[type][id]
-    return @messages[type][id]
+    return Messages.sanitizeString(@messages[type][id])
   end
 
   def getFromMapHash(type, key)
@@ -654,9 +659,9 @@ class Messages
     return key if !@messages[0][type] && !@messages[0][0]
     id = Messages.stringToKey(key)
     if @messages[0][type] && @messages[0][type][id]
-      return @messages[0][type][id]
+      return Messages.sanitizeString(@messages[0][type][id])
     elsif @messages[0][0] && @messages[0][0][id]
-      return @messages[0][0][id]
+      return Messages.sanitizeString(@messages[0][0][id])
     end
     return key
   end

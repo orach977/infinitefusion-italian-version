@@ -1170,12 +1170,14 @@ def drawTextTable(bitmap,x,y,totalWidth,rowHeight,columnWidthPercents,table)
 end
 
 def drawTextEx(bitmap,x,y,width,numlines,text,baseColor,shadowColor)
+  text = text.gsub("\u2019", "'").gsub("\u2018", "'").gsub("\u201C", '"').gsub("\u201D", '"') if text.is_a?(String)
   normtext=getLineBrokenChunks(bitmap,text,width,nil,true)
   renderLineBrokenChunksWithShadow(bitmap,x,y,normtext,numlines*32,
      baseColor,shadowColor)
 end
 
 def drawFormattedTextEx(bitmap,x,y,width,text,baseColor=nil,shadowColor=nil,lineheight=32)
+  text = text.gsub("\u2019", "'").gsub("\u2018", "'").gsub("\u201C", '"').gsub("\u201D", '"') if text.is_a?(String)
   default_base = baseColor.nil?
   default_shadow = shadowColor.nil?
   base=!baseColor ? Color.new(12*8,12*8,12*8) : baseColor.clone
@@ -1200,6 +1202,7 @@ end
 
 def pbDrawShadowText(bitmap,x,y,width,height,string,baseColor,shadowColor=nil,align=0)
   return if !bitmap || !string
+  string = string.gsub("\u2019", "'").gsub("\u2018", "'").gsub("\u201C", '"').gsub("\u201D", '"') if string.is_a?(String)
   width=(width<0) ? bitmap.text_size(string).width+1 : width
   height=(height<0) ? bitmap.text_size(string).height+1 : height
   y += 4
@@ -1217,6 +1220,7 @@ end
 
 def pbDrawOutlineText(bitmap,x,y,width,height,string,baseColor,shadowColor=nil,align=0)
   return if !bitmap || !string
+  string = string.gsub("\u2019", "'").gsub("\u2018", "'").gsub("\u201C", '"').gsub("\u201D", '"') if string.is_a?(String)
   width=(width<0) ? bitmap.text_size(string).width+4 : width
   height=(height<0) ? bitmap.text_size(string).height+4 : height
   if shadowColor && shadowColor.alpha>0

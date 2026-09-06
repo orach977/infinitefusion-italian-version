@@ -78,6 +78,15 @@ Le voci del Pokédex con descrizioni originali e curiosità tradotte in italiano
   <img src="docs/screenshots/pokedex_ingame_it.png" alt="Pokédex in-game in italiano" width="85%">
 </p>
 
+### 🎒 Borsa e Strumenti in Italiano
+Tutti gli strumenti, rimedi, bacche e relative descrizioni degli effetti sono completamente tradotti in italiano ufficiale:
+
+<p align="center">
+  <img src="docs/screenshots/borsa_rimedi_it.png" alt="Borsa Rimedi in italiano" width="48%">
+  &nbsp;
+  <img src="docs/screenshots/borsa_bacche_it.png" alt="Borsa Bacche in italiano" width="48%">
+</p>
+
 ---
 
 ## 💻 Requisiti
