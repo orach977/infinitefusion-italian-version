@@ -100,10 +100,12 @@ Durante la fusione (o consultando l'anteprima con *Super giunzioni*), confronta 
 </p>
 
 ### 📊 Visualizzatore IV, EV e Natura
-Nella schermata delle statistiche di qualsiasi Pokémon del team (Pagina 2 del riepilogo), premi **Z** o il tasto Azione per svelare istantaneamente i Valori Individuali (IV 0-31), i Punti Allenamento (EV 0-252) e le statistiche favorite dalla Natura:
+Nella schermata delle statistiche di qualsiasi Pokémon del team (Pagina 3 del riepilogo "Competenze"), premi **Z** o il tasto Azione per svelare istantaneamente i Valori Individuali (IV 0-31), il conteggio dei Punti Allenamento (EV 0-252 su totale 510) e i modificatori della Natura (+/-):
 
 <p align="center">
-  <img src="docs/screenshots/riepilogo_iv_ev.png" alt="Visualizzatore IV, EV e Natura in gioco" width="85%">
+  <img src="docs/screenshots/riepilogo_iv.png" alt="Schermata visualizzazione IV" width="48%">
+  &nbsp;
+  <img src="docs/screenshots/riepilogo_ev.png" alt="Schermata visualizzazione EV" width="48%">
 </p>
 
 ---

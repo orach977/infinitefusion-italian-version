@@ -729,19 +729,20 @@ class PokemonSummary_Scene
                    _INTL("Discreto")
                  end
       textpos = [
-        [_INTL("IV (Tot: {1}/186 - {2})", total_iv, judgment), 350, 44, 2, Color.new(100, 240, 100), Color.new(20, 80, 20)],
+        [_INTL("[Z: EV]"), 248, 44, 0, Color.new(120, 210, 255), Color.new(30, 60, 90)],
+        [_INTL("IV (Tot: {1}/186 - {2})", total_iv, judgment), 478, 44, 1, Color.new(100, 240, 100), Color.new(20, 80, 20)],
         [_INTL("HP"), 292, 70, 2, base, statshadows[:HP]],
-        [sprintf("%d / 31", @pokemon.iv[:HP]), 462, 70, 1, (@pokemon.iv[:HP] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 31", @pokemon.iv[:HP]), 478, 70, 1, (@pokemon.iv[:HP] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Attack") + nature_marks[:ATTACK], 248, 114, 0, base, statshadows[:ATTACK]],
-        [sprintf("%d / 31", @pokemon.iv[:ATTACK]), 456, 114, 1, (@pokemon.iv[:ATTACK] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 31", @pokemon.iv[:ATTACK]), 478, 114, 1, (@pokemon.iv[:ATTACK] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Defense") + nature_marks[:DEFENSE], 248, 146, 0, base, statshadows[:DEFENSE]],
-        [sprintf("%d / 31", @pokemon.iv[:DEFENSE]), 456, 146, 1, (@pokemon.iv[:DEFENSE] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 31", @pokemon.iv[:DEFENSE]), 478, 146, 1, (@pokemon.iv[:DEFENSE] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Sp. Atk") + nature_marks[:SPECIAL_ATTACK], 248, 178, 0, base, statshadows[:SPECIAL_ATTACK]],
-        [sprintf("%d / 31", @pokemon.iv[:SPECIAL_ATTACK]), 456, 178, 1, (@pokemon.iv[:SPECIAL_ATTACK] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 31", @pokemon.iv[:SPECIAL_ATTACK]), 478, 178, 1, (@pokemon.iv[:SPECIAL_ATTACK] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Sp. Def") + nature_marks[:SPECIAL_DEFENSE], 248, 210, 0, base, statshadows[:SPECIAL_DEFENSE]],
-        [sprintf("%d / 31", @pokemon.iv[:SPECIAL_DEFENSE]), 456, 210, 1, (@pokemon.iv[:SPECIAL_DEFENSE] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 31", @pokemon.iv[:SPECIAL_DEFENSE]), 478, 210, 1, (@pokemon.iv[:SPECIAL_DEFENSE] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Speed") + nature_marks[:SPEED], 248, 242, 0, base, statshadows[:SPEED]],
-        [sprintf("%d / 31", @pokemon.iv[:SPEED]), 456, 242, 1, (@pokemon.iv[:SPEED] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 31", @pokemon.iv[:SPEED]), 478, 242, 1, (@pokemon.iv[:SPEED] == 31) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Ability"), 224, 278, 0, base, shadow]
       ]
     elsif mode == 2
@@ -749,37 +750,38 @@ class PokemonSummary_Scene
       total_ev = (@pokemon.ev[:HP] || 0) + (@pokemon.ev[:ATTACK] || 0) + (@pokemon.ev[:DEFENSE] || 0) +
                  (@pokemon.ev[:SPECIAL_ATTACK] || 0) + (@pokemon.ev[:SPECIAL_DEFENSE] || 0) + (@pokemon.ev[:SPEED] || 0)
       textpos = [
-        [_INTL("EV (Tot: {1}/510)", total_ev), 350, 44, 2, Color.new(255, 200, 60), Color.new(100, 70, 10)],
+        [_INTL("[Z: Statistiche]"), 248, 44, 0, Color.new(120, 210, 255), Color.new(30, 60, 90)],
+        [_INTL("EV (Tot: {1}/510)", total_ev), 478, 44, 1, Color.new(255, 200, 60), Color.new(100, 70, 10)],
         [_INTL("HP"), 292, 70, 2, base, statshadows[:HP]],
-        [sprintf("%d / 252", @pokemon.ev[:HP]), 462, 70, 1, (@pokemon.ev[:HP] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 252", @pokemon.ev[:HP]), 478, 70, 1, (@pokemon.ev[:HP] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Attack") + nature_marks[:ATTACK], 248, 114, 0, base, statshadows[:ATTACK]],
-        [sprintf("%d / 252", @pokemon.ev[:ATTACK]), 456, 114, 1, (@pokemon.ev[:ATTACK] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 252", @pokemon.ev[:ATTACK]), 478, 114, 1, (@pokemon.ev[:ATTACK] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Defense") + nature_marks[:DEFENSE], 248, 146, 0, base, statshadows[:DEFENSE]],
-        [sprintf("%d / 252", @pokemon.ev[:DEFENSE]), 456, 146, 1, (@pokemon.ev[:DEFENSE] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 252", @pokemon.ev[:DEFENSE]), 478, 146, 1, (@pokemon.ev[:DEFENSE] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Sp. Atk") + nature_marks[:SPECIAL_ATTACK], 248, 178, 0, base, statshadows[:SPECIAL_ATTACK]],
-        [sprintf("%d / 252", @pokemon.ev[:SPECIAL_ATTACK]), 456, 178, 1, (@pokemon.ev[:SPECIAL_ATTACK] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 252", @pokemon.ev[:SPECIAL_ATTACK]), 478, 178, 1, (@pokemon.ev[:SPECIAL_ATTACK] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Sp. Def") + nature_marks[:SPECIAL_DEFENSE], 248, 210, 0, base, statshadows[:SPECIAL_DEFENSE]],
-        [sprintf("%d / 252", @pokemon.ev[:SPECIAL_DEFENSE]), 456, 210, 1, (@pokemon.ev[:SPECIAL_DEFENSE] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 252", @pokemon.ev[:SPECIAL_DEFENSE]), 478, 210, 1, (@pokemon.ev[:SPECIAL_DEFENSE] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Speed") + nature_marks[:SPEED], 248, 242, 0, base, statshadows[:SPEED]],
-        [sprintf("%d / 252", @pokemon.ev[:SPEED]), 456, 242, 1, (@pokemon.ev[:SPEED] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
+        [sprintf("%d / 252", @pokemon.ev[:SPEED]), 478, 242, 1, (@pokemon.ev[:SPEED] >= 252) ? Color.new(255, 215, 0) : @text_color_base, @text_color_shadow],
         [_INTL("Ability"), 224, 278, 0, base, shadow]
       ]
     else
       # Modalità 0: Statistiche normali
       textpos = [
-        [_INTL("[Z: IV/EV]"), 420, 44, 2, Color.new(160, 210, 255), Color.new(30, 60, 90)],
+        [_INTL("[Z: IV/EV]"), 478, 44, 1, Color.new(160, 210, 255), Color.new(30, 60, 90)],
         [_INTL("HP"), 292, 70, 2, base, statshadows[:HP]],
-        [sprintf("%d/%d", @pokemon.hp, @pokemon.totalhp), 462, 70, 1, @text_color_base, @text_color_shadow],
+        [sprintf("%d/%d", @pokemon.hp, @pokemon.totalhp), 478, 70, 1, @text_color_base, @text_color_shadow],
         [_INTL("Attack") + nature_marks[:ATTACK], 248, 114, 0, base, statshadows[:ATTACK]],
-        [sprintf("%d", @pokemon.attack), 456, 114, 1, @text_color_base, @text_color_shadow],
+        [sprintf("%d", @pokemon.attack), 478, 114, 1, @text_color_base, @text_color_shadow],
         [_INTL("Defense") + nature_marks[:DEFENSE], 248, 146, 0, base, statshadows[:DEFENSE]],
-        [sprintf("%d", @pokemon.defense), 456, 146, 1, @text_color_base, @text_color_shadow],
+        [sprintf("%d", @pokemon.defense), 478, 146, 1, @text_color_base, @text_color_shadow],
         [_INTL("Sp. Atk") + nature_marks[:SPECIAL_ATTACK], 248, 178, 0, base, statshadows[:SPECIAL_ATTACK]],
-        [sprintf("%d", @pokemon.spatk), 456, 178, 1, @text_color_base, @text_color_shadow],
+        [sprintf("%d", @pokemon.spatk), 478, 178, 1, @text_color_base, @text_color_shadow],
         [_INTL("Sp. Def") + nature_marks[:SPECIAL_DEFENSE], 248, 210, 0, base, statshadows[:SPECIAL_DEFENSE]],
-        [sprintf("%d", @pokemon.spdef), 456, 210, 1, @text_color_base, @text_color_shadow],
+        [sprintf("%d", @pokemon.spdef), 478, 210, 1, @text_color_base, @text_color_shadow],
         [_INTL("Speed") + nature_marks[:SPEED], 248, 242, 0, base, statshadows[:SPEED]],
-        [sprintf("%d", @pokemon.speed), 456, 242, 1, @text_color_base, @text_color_shadow],
+        [sprintf("%d", @pokemon.speed), 478, 242, 1, @text_color_base, @text_color_shadow],
         [_INTL("Ability"), 224, 278, 0, base, shadow]
       ]
     end
