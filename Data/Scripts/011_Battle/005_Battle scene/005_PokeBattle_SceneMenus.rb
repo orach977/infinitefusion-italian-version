@@ -227,12 +227,12 @@ class FightMenuDisplay < BattleMenuBase
   #     displayed.
   USE_GRAPHICS     = true
   TYPE_ICON_HEIGHT = 28
-  # Text colours of PP of selected move
+  # Colori PP dinamici per tema moderno Dark Glass
   PP_COLORS = [
-     Color.new(248,72,72),Color.new(136,48,48),    # Red, zero PP
-     Color.new(248,136,32),Color.new(144,72,24),   # Orange, 1/4 of total PP or less
-     Color.new(248,192,0),Color.new(144,104,0),    # Yellow, 1/2 of total PP or less
-     TEXT_BASE_COLOR,TEXT_SHADOW_COLOR             # Black, more than 1/2 of total PP
+     Color.new(255, 80, 80),   Color.new(90, 20, 20),    # Rosso, PP esauriti
+     Color.new(255, 120, 40),  Color.new(110, 40, 10),   # Arancione, <= 1/4 PP
+     Color.new(255, 215, 0),   Color.new(120, 90, 0),    # Giallo, <= 1/2 PP
+     Color.new(100, 240, 150), Color.new(20, 80, 40)    # Verde lime, > 1/2 PP
   ]
 
   def initialize(viewport,z)
@@ -247,11 +247,13 @@ class FightMenuDisplay < BattleMenuBase
       # Create bitmaps
       button_path = "Graphics/Pictures/Battle/cursor_fight"
       type_path = "Graphics/Pictures/types"
+      category_path = "Graphics/Pictures/category"
       if isDarkMode
         button_path += "_dark"
       end
-      @buttonBitmap  = AnimatedBitmap.new(button_path)
-      @typeBitmap    = AnimatedBitmap.new(type_path)
+      @buttonBitmap   = AnimatedBitmap.new(button_path)
+      @typeBitmap     = AnimatedBitmap.new(type_path)
+      @categoryBitmap = AnimatedBitmap.new(category_path)
 
       @megaEvoBitmap = AnimatedBitmap.new("Graphics/Pictures/Battle/cursor_mega")
       @shiftBitmap   = AnimatedBitmap.new("Graphics/Pictures/Battle/cursor_shift")
@@ -272,14 +274,14 @@ class FightMenuDisplay < BattleMenuBase
         addSprite("button_#{i}",button)
         next button
       end
-      # Create overlay for buttons (shows move names)
+      # Create overlay for buttons (shows move names and pill badges)
       @pokemon_name_overlay = BitmapSprite.new(Graphics.width, Graphics.height-self.y, viewport)
       @pokemon_name_overlay.x = self.x
       @pokemon_name_overlay.y = self.y
       pbSetSystemFont(@pokemon_name_overlay.bitmap)
       @pokemon_name_overlay.bitmap.font.size = 22
       addSprite("overlay", @pokemon_name_overlay)
-      # Create overlay for selected move's info (shows move's PP)
+      # Create overlay for selected move's info (shows move's PP, POT, PREC, Eff pill)
       @infoOverlay = BitmapSprite.new(Graphics.width,Graphics.height-self.y,viewport)
       @infoOverlay.x = self.x
       @infoOverlay.y = self.y
@@ -289,10 +291,19 @@ class FightMenuDisplay < BattleMenuBase
       # Create type icon
       @typeIcon = SpriteWrapper.new(viewport)
       @typeIcon.bitmap = @typeBitmap.bitmap
-      @typeIcon.x      = self.x+416
-      @typeIcon.y      = self.y+20
+      @typeIcon.x      = self.x+390
+      @typeIcon.y      = self.y+10
       @typeIcon.src_rect.height = TYPE_ICON_HEIGHT
       addSprite("typeIcon",@typeIcon)
+      # Create category icon (Fisico, Speciale, Stato)
+      @categoryIcon = SpriteWrapper.new(viewport)
+      @categoryIcon.bitmap = @categoryBitmap.bitmap
+      @categoryIcon.x      = self.x+458
+      @categoryIcon.y      = self.y+10
+      @categoryIcon.src_rect.x = 10
+      @categoryIcon.src_rect.width = 44
+      @categoryIcon.src_rect.height = 28
+      addSprite("categoryIcon",@categoryIcon)
       # Create Mega Evolution button
       @megaButton = SpriteWrapper.new(viewport)
       @megaButton.bitmap = @megaEvoBitmap.bitmap
@@ -330,6 +341,7 @@ class FightMenuDisplay < BattleMenuBase
     super
     @buttonBitmap.dispose if @buttonBitmap
     @typeBitmap.dispose if @typeBitmap
+    @categoryBitmap.dispose if @categoryBitmap
     @megaEvoBitmap.dispose if @megaEvoBitmap
     @shiftBitmap.dispose if @shiftBitmap
   end
@@ -341,6 +353,7 @@ class FightMenuDisplay < BattleMenuBase
     @pokemon_name_overlay.z     += 5 if @pokemon_name_overlay
     @infoOverlay.z += 6 if @infoOverlay
     @typeIcon.z    += 1 if @typeIcon
+    @categoryIcon.z += 1 if @categoryIcon
   end
 
   def battler=(value)
@@ -355,60 +368,99 @@ class FightMenuDisplay < BattleMenuBase
     refreshShiftButton if @shiftMode!=oldValue
   end
 
+  # Helper per disegnare badge a pillola con angoli arrotondati e bordo sottile
+  def drawPill(bitmap, px, py, pw, ph, bg_color, border_color=nil)
+    return if !bitmap || !bg_color
+    bitmap.fill_rect(px + 2, py, pw - 4, ph, bg_color)
+    bitmap.fill_rect(px + 1, py + 1, pw - 2, ph - 2, bg_color)
+    bitmap.fill_rect(px, py + 2, pw, ph - 4, bg_color)
+    if border_color
+      bitmap.fill_rect(px + 2, py, pw - 4, 1, border_color)
+      bitmap.fill_rect(px + 2, py + ph - 1, pw - 4, 1, border_color)
+      bitmap.fill_rect(px, py + 2, 1, ph - 4, border_color)
+      bitmap.fill_rect(px + pw - 1, py + 2, 1, ph - 4, border_color)
+      bitmap.fill_rect(px + 1, py + 1, 1, 1, border_color)
+      bitmap.fill_rect(px + pw - 2, py + 1, 1, 1, border_color)
+      bitmap.fill_rect(px + 1, py + ph - 2, 1, 1, border_color)
+      bitmap.fill_rect(px + pw - 2, py + ph - 2, 1, 1, border_color)
+    end
+  end
+
   def getEffectivenessData(move)
     return nil if !move || !@battler || !@battler.battle
     opp = @battler.pbDirectOpposing(true)
     return nil if !opp
     if move.statusMove?
       return {
-        :badge => _INTL("--"),
-        :full => _INTL("Stato"),
-        :base => Color.new(140, 200, 255),
-        :shadow => Color.new(40, 60, 100)
+        :badge  => _INTL("--"),
+        :full   => _INTL("Stato"),
+        :tag    => _INTL("STATO"),
+        :bg     => Color.new(26, 76, 112),
+        :border => Color.new(38, 108, 160),
+        :base   => Color.new(255, 255, 255),
+        :shadow => Color.new(10, 30, 48)
       }
     end
     mod = move.pbCalcTypeMod(move.type, @battler, opp)
     if Effectiveness.ineffective?(mod)
       return {
-        :badge => _INTL("x0"),
-        :full => _INTL("Immune"),
-        :base => Color.new(180, 180, 180),
-        :shadow => Color.new(60, 60, 60)
+        :badge  => _INTL("x0"),
+        :full   => _INTL("Immune"),
+        :tag    => _INTL("IMMUNE"),
+        :bg     => Color.new(80, 90, 105),
+        :border => Color.new(110, 122, 140),
+        :base   => Color.new(255, 255, 255),
+        :shadow => Color.new(25, 30, 36)
       }
     elsif Effectiveness.extremely_effective?(mod)
       return {
-        :badge => _INTL("x4"),
-        :full => _INTL("Super (x4)"),
-        :base => Color.new(255, 215, 0),
-        :shadow => Color.new(140, 100, 0)
+        :badge  => _INTL("x4"),
+        :full   => _INTL("Super (x4)"),
+        :tag    => _INTL("SUPER x4"),
+        :bg     => Color.new(210, 165, 20),
+        :border => Color.new(255, 215, 0),
+        :base   => Color.new(255, 255, 255),
+        :shadow => Color.new(70, 50, 5)
       }
     elsif Effectiveness.super_effective?(mod)
       return {
-        :badge => _INTL("x2"),
-        :full => _INTL("Super (x2)"),
-        :base => Color.new(80, 240, 90),
-        :shadow => Color.new(10, 80, 20)
+        :badge  => _INTL("x2"),
+        :full   => _INTL("Super (x2)"),
+        :tag    => _INTL("SUPER x2"),
+        :bg     => Color.new(34, 160, 70),
+        :border => Color.new(50, 200, 90),
+        :base   => Color.new(255, 255, 255),
+        :shadow => Color.new(10, 55, 22)
       }
     elsif Effectiveness.mostly_ineffective?(mod)
       return {
-        :badge => _INTL("x0.25"),
-        :full => _INTL("Poco x0.25"),
-        :base => Color.new(255, 90, 90),
-        :shadow => Color.new(120, 20, 20)
+        :badge  => _INTL("x0.25"),
+        :full   => _INTL("Poco x0.25"),
+        :tag    => _INTL("POCO x0.25"),
+        :bg     => Color.new(220, 50, 50),
+        :border => Color.new(255, 90, 90),
+        :base   => Color.new(255, 255, 255),
+        :shadow => Color.new(65, 12, 12)
       }
     elsif Effectiveness.not_very_effective?(mod)
       return {
-        :badge => _INTL("x0.5"),
-        :full => _INTL("Poco x0.5"),
-        :base => Color.new(255, 150, 50),
-        :shadow => Color.new(130, 60, 10)
+        :badge  => _INTL("x0.5"),
+        :full   => _INTL("Poco x0.5"),
+        :tag    => _INTL("POCO x0.5"),
+        :bg     => Color.new(230, 95, 40),
+        :border => Color.new(255, 140, 70),
+        :base   => Color.new(255, 255, 255),
+        :shadow => Color.new(70, 25, 10)
       }
     else
       return {
-        :badge => _INTL("x1"),
-        :full => _INTL("Efficace"),
-        :base => Color.new(210, 210, 210),
-        :shadow => Color.new(70, 70, 70)
+        :badge  => _INTL("x1"),
+        :full   => _INTL("Efficace"),
+        :tag    => _INTL("EFFIC."),
+        :bg     => Color.new(35, 48, 70),
+        :border => Color.new(55, 75, 105),
+        :base   => Color.new(220, 230, 245),
+        :shadow => Color.new(12, 18, 28)
       }
     end
   rescue
@@ -426,44 +478,40 @@ class FightMenuDisplay < BattleMenuBase
       @cmdWindow.commands = commands
       return
     end
-    # Draw move names onto overlay
+    # Draw move names and badges onto overlay
     @pokemon_name_overlay.bitmap.clear
     pbSetSystemFont(@pokemon_name_overlay.bitmap)
-    @pokemon_name_overlay.bitmap.font.size = 22
     textPos = []
+    badgeTextPos = []
+
     @buttons.each_with_index do |button,i|
-      next if !@visibility["button_#{i}"]
+      next if !@visibility["button_#{i}"] || !moves[i]
       bx = button.x - self.x
       by = button.y - self.y
-      name_x = bx + 18
-      badge_x = bx + 172
-      y = by + 4
-      moveNameBase = TEXT_BASE_COLOR
-      if moves[i].type
-        # NOTE: This takes a colour from a particular pixel in the button
-        #       graphic and makes the move name's base colour that same colour.
-        #       The pixel is at coordinates 10,34 in the button box. If you
-        #       change the graphic, you may want to change/remove the below line
-        #       of code to ensure the font is an appropriate colour.
-        moveNameBase = button.bitmap.get_pixel(10,button.src_rect.y+34)
-      end
-      if isDarkMode
-        textPos.push([moves[i].name, name_x, y, 0, TEXT_SHADOW_COLOR, moveNameBase])
-      else
-        textPos.push([moves[i].name, name_x, y, 0, moveNameBase, TEXT_SHADOW_COLOR])
-      end
-      # Indicatore efficacia mossa sulla stessa riga a destra del pulsante (nessun overlap verticale!)
+      name_x = bx + 16
+      y = by + 6
+      moveNameBase = Color.new(255, 255, 255)
+      moveNameShadow = Color.new(12, 16, 26)
+
+      textPos.push([moves[i].name, name_x, y, 0, moveNameBase, moveNameShadow])
+
+      # Indicatore pillola efficacia a destra del pulsante mossa
       eff = getEffectivenessData(moves[i])
       if eff && eff[:badge]
-        badgeBase = eff[:base]
-        badgeShadow = eff[:shadow]
-        if isDarkMode
-          badgeBase, badgeShadow = badgeShadow, badgeBase
-        end
-        textPos.push([eff[:badge], badge_x, y, 1, badgeBase, badgeShadow])
+        pw = (eff[:badge].length > 2) ? 42 : 36
+        ph = 18
+        px = bx + 188 - pw - 6
+        py = by + 12
+        drawPill(@pokemon_name_overlay.bitmap, px, py, pw, ph, eff[:bg], eff[:border])
+        badgeTextPos.push([eff[:badge], px + (pw / 2), py - 2, 2, eff[:base], eff[:shadow]])
       end
     end
-    pbDrawTextPositions(@pokemon_name_overlay.bitmap, textPos)
+
+    @pokemon_name_overlay.bitmap.font.size = 22
+    pbDrawTextPositions(@pokemon_name_overlay.bitmap, textPos) if textPos.length > 0
+
+    @pokemon_name_overlay.bitmap.font.size = 16
+    pbDrawTextPositions(@pokemon_name_overlay.bitmap, badgeTextPos) if badgeTextPos.length > 0
   end
 
   def refreshSelection
@@ -498,40 +546,64 @@ class FightMenuDisplay < BattleMenuBase
     end
     @infoOverlay.bitmap.clear
     pbSetSystemFont(@infoOverlay.bitmap)
-    @infoOverlay.bitmap.font.size = 24
     if !move
       @visibility["typeIcon"] = false
+      @visibility["categoryIcon"] = false if @categoryIcon
       return
     end
     @visibility["typeIcon"] = true
-    # Type icon
     type_number = GameData::Type.get(move.type).id_number
     @typeIcon.src_rect.y = type_number * TYPE_ICON_HEIGHT
-    # PP text and Effectiveness
-    textPos = []
-    if move.total_pp>0
-      ppFraction = [(4.0*move.pp/move.total_pp).ceil,3].min
 
-      ppColorBase = PP_COLORS[ppFraction*2]
-      ppColorShadow = PP_COLORS[ppFraction*2+1]
-      if isDarkMode
-        ppColorBase, ppColorShadow = ppColorShadow, ppColorBase
-      end
-
-      textPos.push([_INTL("PP: {1}/{2}",move.pp,move.total_pp),
-         448,36,2,ppColorBase,ppColorShadow])
+    if @categoryIcon
+      @visibility["categoryIcon"] = true
+      @categoryIcon.src_rect.y = move.category * 28
     end
-    # Dettaglio efficacia nell'overlay destro (centrato nel riquadro bianco)
+
+    # 1. POT & PREC (Row 2, y = 38)
+    pwr_text = (move.baseDamage > 0) ? _INTL("POT: {1}", move.baseDamage) : _INTL("POT: ---")
+    acc_text = (move.accuracy > 0) ? _INTL("PREC: {1}", move.accuracy) : _INTL("PREC: ---")
+    stat_color = Color.new(225, 230, 242)
+    stat_shadow = Color.new(12, 16, 26)
+
+    @infoOverlay.bitmap.font.size = 15
+    statsPos = [
+      [pwr_text, 390, 38, 0, stat_color, stat_shadow],
+      [acc_text, 506, 38, 1, stat_color, stat_shadow]
+    ]
+    pbDrawTextPositions(@infoOverlay.bitmap, statsPos)
+
+    # 2. PP (Row 3, y = 60)
+    pp_str = (move.total_pp > 0) ? _INTL("PP: {1}/{2}", move.pp, move.total_pp) : _INTL("PP: ---")
+    if move.total_pp > 0
+      ppFraction = [(4.0 * move.pp / move.total_pp).ceil, 3].min
+      ppColorBase = PP_COLORS[ppFraction * 2]
+      ppColorShadow = PP_COLORS[ppFraction * 2 + 1]
+    else
+      ppColorBase = PP_COLORS[0]
+      ppColorShadow = PP_COLORS[1]
+    end
+
+    @infoOverlay.bitmap.font.size = 18
+    ppPos = [
+      [pp_str, 390, 60, 0, ppColorBase, ppColorShadow]
+    ]
+    pbDrawTextPositions(@infoOverlay.bitmap, ppPos)
+
+    # 3. Pillola Efficacia in basso a destra (Row 3, y = 62)
     eff = getEffectivenessData(move)
-    if eff && eff[:full]
-      effBase = eff[:base]
-      effShadow = eff[:shadow]
-      if isDarkMode
-        effBase, effShadow = effShadow, effBase
-      end
-      textPos.push([eff[:full], 448, 56, 2, effBase, effShadow])
+    if eff && eff[:badge]
+      pw = (eff[:badge].length > 2) ? 42 : 36
+      ph = 20
+      px = 506 - pw
+      py = 62
+      drawPill(@infoOverlay.bitmap, px, py, pw, ph, eff[:bg], eff[:border])
+      @infoOverlay.bitmap.font.size = 15
+      tagPos = [
+        [eff[:badge], px + (pw / 2), py - 2, 2, eff[:base], eff[:shadow]]
+      ]
+      pbDrawTextPositions(@infoOverlay.bitmap, tagPos)
     end
-    pbDrawTextPositions(@infoOverlay.bitmap,textPos) if textPos.length > 0
   end
 
   def refreshMegaEvolutionButton
