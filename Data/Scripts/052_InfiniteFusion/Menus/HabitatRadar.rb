@@ -96,7 +96,7 @@ module HabitatRadarData
     return maps
   end
 
-  def self.encounter_type_label(type)
+  def self.encounter_base_label(type)
     t = type.to_s
     case
     when t.start_with?("Land")      then "Erba"
@@ -112,16 +112,71 @@ module HabitatRadarData
     end
   end
 
-  def self.encounter_type_symbol(type)
+  def self.encounter_time_category(type)
     t = type.to_s
-    case
-    when t.start_with?("Land")      then "[Erba]"
-    when t.start_with?("Water")     then "[Surf]"
-    when t.include?("Rod")          then "[Pesca]"
-    when t.start_with?("Cave")      then "[Grotta]"
-    when t == "RockSmash"           then "[Roccia]"
-    when t.start_with?("Headbutt")  then "[Albero]"
-    else "[Selvatico]"
+    if t.include?("Morning")
+      :morning
+    elsif t.include?("Night")
+      :night
+    elsif t.include?("Evening")
+      :evening
+    elsif t.include?("Afternoon")
+      :afternoon
+    elsif t.include?("Day")
+      :day
+    else
+      :any
+    end
+  end
+
+  def self.encounter_time_label(category)
+    case category
+    when :morning   then "Mattina"
+    when :day       then "Giorno"
+    when :afternoon then "Pomeriggio"
+    when :evening   then "Sera"
+    when :night     then "Notte"
+    else "Sempre"
+    end
+  end
+
+  def self.encounter_type_label(type)
+    base = encounter_base_label(type)
+    time = encounter_time_label(encounter_time_category(type))
+    time == "Sempre" ? base : "#{base} (#{time})"
+  end
+
+  def self.encounter_type_symbol(type)
+    base = encounter_base_label(type)
+    "[#{base}]"
+  end
+
+  def self.current_time_category
+    return :night     if defined?(PBDayNight) && PBDayNight.isNight?
+    return :morning   if defined?(PBDayNight) && PBDayNight.isMorning?
+    return :evening   if defined?(PBDayNight) && PBDayNight.isEvening?
+    return :afternoon if defined?(PBDayNight) && PBDayNight.isAfternoon?
+    return :day
+  end
+
+  def self.current_time_display
+    time = (defined?(pbGetTimeNow) ? pbGetTimeNow : Time.now)
+    hm = time.strftime("%H:%M") rescue "--:--"
+    cat = current_time_category
+    lbl = encounter_time_label(cat).upcase
+    "#{hm}  #{lbl}"
+  end
+
+  def self.is_method_active_now?(time_cat)
+    return true if time_cat == :any
+    cur = current_time_category
+    case time_cat
+    when :night     then (cur == :night)
+    when :morning   then (cur == :morning)
+    when :evening   then (cur == :evening)
+    when :afternoon then (cur == :afternoon || cur == :day)
+    when :day       then (cur == :day || cur == :afternoon)
+    else true
     end
   end
 
@@ -139,6 +194,11 @@ module HabitatRadarData
 
     enc_data.types.each do |enc_type, slot_list|
       next if slot_list.nil? || slot_list.empty?
+
+      time_cat = encounter_time_category(enc_type)
+      time_lbl = encounter_time_label(time_cat)
+      base_lbl = encounter_base_label(enc_type)
+      act_now  = is_method_active_now?(time_cat)
 
       total_weight = 0
       slot_list.each { |s| total_weight += (s[0] || 1) if s }
@@ -171,8 +231,10 @@ module HabitatRadarData
             :min_level     => info[:min],
             :max_level     => info[:max],
             :max_chance    => pct,
-            :primary_label => encounter_type_label(enc_type),
-            :primary_icon  => encounter_type_symbol(enc_type)
+            :primary_label => "#{base_lbl} (#{time_lbl})",
+            :primary_base  => base_lbl,
+            :primary_time  => time_lbl,
+            :primary_icon  => "[#{base_lbl}]"
           }
         end
 
@@ -180,16 +242,22 @@ module HabitatRadarData
         cur[:min_level] = [cur[:min_level], info[:min]].min
         cur[:max_level] = [cur[:max_level], info[:max]].max
         if pct > cur[:max_chance]
-          cur[:max_chance] = pct
-          cur[:primary_label] = encounter_type_label(enc_type)
-          cur[:primary_icon]  = encounter_type_symbol(enc_type)
+          cur[:max_chance]    = pct
+          cur[:primary_label] = "#{base_lbl} (#{time_lbl})"
+          cur[:primary_base]  = base_lbl
+          cur[:primary_time]  = time_lbl
+          cur[:primary_icon]  = "[#{base_lbl}]"
         end
+
         cur[:methods] << {
-          :type   => enc_type,
-          :label  => encounter_type_label(enc_type),
-          :chance => pct,
-          :min    => info[:min],
-          :max    => info[:max]
+          :type          => enc_type,
+          :base_label    => base_lbl,
+          :time_category => time_cat,
+          :time_label    => time_lbl,
+          :chance        => pct,
+          :min           => info[:min],
+          :max           => info[:max],
+          :active_now    => act_now
         }
       end
     end
@@ -212,16 +280,39 @@ module HabitatRadarData
       item[:owned] = ($Trainer && $Trainer.pokedex) ? $Trainer.pokedex.owned?(sp) : false
       item[:seen]  = ($Trainer && $Trainer.pokedex) ? $Trainer.pokedex.seen?(sp) : false
 
+      # Orari di comparsa
+      item[:active_now]   = item[:methods].any? { |m| m[:active_now] }
+      item[:has_day]      = item[:methods].any? { |m| [:day, :afternoon, :any].include?(m[:time_category]) }
+      item[:has_night]    = item[:methods].any? { |m| [:night, :any].include?(m[:time_category]) }
+      item[:has_morning]  = item[:methods].any? { |m| [:morning, :any].include?(m[:time_category]) }
+
+      has_only_day   = item[:methods].all? { |m| [:day, :afternoon].include?(m[:time_category]) }
+      has_only_night = item[:methods].all? { |m| m[:time_category] == :night }
+      has_only_morn  = item[:methods].all? { |m| m[:time_category] == :morning }
+      all_any        = item[:methods].all? { |m| m[:time_category] == :any }
+
+      if all_any
+        item[:time_tag] = "Tutto il di"
+      elsif has_only_night
+        item[:time_tag] = "Solo Notte"
+      elsif has_only_day
+        item[:time_tag] = "Solo Giorno"
+      elsif has_only_morn
+        item[:time_tag] = "Solo Mattina"
+      else
+        item[:time_tag] = "Giorno/Notte"
+      end
+
       ch = item[:max_chance]
       if ch < 8
         item[:rarity_tag]   = "RARO"
-        item[:rarity_color] = Color.new(225, 90, 245)
+        item[:rarity_color] = Color.new(230, 95, 255)
       elsif ch <= 20
-        item[:rarity_tag]   = "NON COMUNE"
-        item[:rarity_color] = Color.new(70, 190, 255)
+        item[:rarity_tag]   = "NON COM."
+        item[:rarity_color] = Color.new(70, 195, 255)
       else
         item[:rarity_tag]   = "COMUNE"
-        item[:rarity_color] = Color.new(85, 235, 125)
+        item[:rarity_color] = Color.new(75, 235, 125)
       end
 
       stats = sp_data.base_stats rescue {}
@@ -301,7 +392,10 @@ module HabitatRadarData
           pct = (sp_weight * 100.0 / tot).round
           pct = 1 if pct <= 0
           map_max_chance = [map_max_chance, pct].max
-          found_methods << encounter_type_label(enc_type)
+          b_lbl = encounter_base_label(enc_type)
+          t_lbl = encounter_time_label(encounter_time_category(enc_type))
+          lbl_full = t_lbl == "Sempre" ? b_lbl : "#{b_lbl} (#{t_lbl})"
+          found_methods << lbl_full
         end
       end
 
@@ -323,10 +417,17 @@ module HabitatRadarData
 end
 
 #===============================================================================
-# Scene Grafica del Radar Habitat (Next-Level Elegance & Zero Lag)
+# Scene Grafica del Radar Habitat (Modern Dark Glass Edition - 512x384)
 #===============================================================================
 class PokemonHabitatRadar_Scene
   CARDS_PER_PAGE = 4
+
+  FILTER_ALL     = 0
+  FILTER_DAY     = 1
+  FILTER_NIGHT   = 2
+  FILTER_MORNING = 3
+  FILTER_ACTIVE  = 4
+  FILTER_NAMES   = ["TUTTI", "GIORNO", "NOTTE", "MATTINA", "ATTIVI ORA"]
 
   def pbStartScene(initial_map_id = nil)
     @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
@@ -340,17 +441,17 @@ class PokemonHabitatRadar_Scene
     end
     @map_index = @all_encounter_maps.index(@map_id) || 0
 
+    @filter_mode = FILTER_ALL
     @pokemon_list = []
+    @filtered_list = []
     @selected_index = 0
     @top_index = 0
     @current_battler_species = nil
 
-    # Layer 0: Sfondo
-    addBackgroundPlane(@sprites, "background", "Pokedex/bg_area", @viewport)
-    if !@sprites["background"] || !@sprites["background"].bitmap
-      addBackgroundPlane(@sprites, "background", "Pokedex/bg_list", @viewport)
-    end
-    @sprites["background"].z = 0 if @sprites["background"]
+    # Layer 0: Sfondo Dark Glass a tutto schermo (512x384) - Nessun bordo rosso residuo!
+    @sprites["background"] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
+    @sprites["background"].z = 0
+    draw_full_background(@sprites["background"].bitmap)
 
     # Layer 1: Pannelli geometrici scuri (z = 5)
     @sprites["panel_overlay"] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
@@ -363,8 +464,8 @@ class PokemonHabitatRadar_Scene
     # Layer 2: Battler grande
     @sprites["battler"] = PokemonSprite.new(@viewport)
     @sprites["battler"].setOffset(PictureOrigin::Center)
-    @sprites["battler"].x = 380
-    @sprites["battler"].y = 82
+    @sprites["battler"].x = 296
+    @sprites["battler"].y = 98
     @sprites["battler"].z = 10
 
     # Layer 2: 4 Mini icone
@@ -389,12 +490,49 @@ class PokemonHabitatRadar_Scene
     pbUpdateSpriteHash(@sprites)
   end
 
+  def draw_full_background(bitmap)
+    w = Graphics.width
+    h = Graphics.height
+    for y in 0...h
+      r = 11 + (4 * y / h)
+      g = 15 + (7 * y / h)
+      b = 25 + (11 * y / h)
+      bitmap.fill_rect(0, y, w, 1, Color.new(r, g, b))
+    end
+    (0...h).step(24) do |gy|
+      bitmap.fill_rect(0, gy, w, 1, Color.new(22, 30, 48, 110))
+    end
+  end
+
   def load_current_map_data
     @map_id = @all_encounter_maps[@map_index]
     @pokemon_list = HabitatRadarData.get_map_pokemon_list(@map_id)
+    update_filtered_list
+  end
+
+  def update_filtered_list
+    case @filter_mode
+    when FILTER_DAY
+      @filtered_list = @pokemon_list.select { |p| p[:has_day] }
+    when FILTER_NIGHT
+      @filtered_list = @pokemon_list.select { |p| p[:has_night] }
+    when FILTER_MORNING
+      @filtered_list = @pokemon_list.select { |p| p[:has_morning] }
+    when FILTER_ACTIVE
+      @filtered_list = @pokemon_list.select { |p| p[:active_now] }
+    else
+      @filtered_list = @pokemon_list.dup
+    end
     @selected_index = 0
     @top_index = 0
     @current_battler_species = nil
+  end
+
+  def cycle_filter
+    @filter_mode = (@filter_mode + 1) % FILTER_NAMES.length
+    update_filtered_list
+    pbSEPlay("GUI naming tab") rescue nil
+    refresh_ui
   end
 
   def set_map(target_map_id)
@@ -426,8 +564,8 @@ class PokemonHabitatRadar_Scene
   end
 
   def cursor_down
-    return if @pokemon_list.empty?
-    if @selected_index < @pokemon_list.length - 1
+    return if @filtered_list.empty?
+    if @selected_index < @filtered_list.length - 1
       @selected_index += 1
       if @selected_index >= @top_index + CARDS_PER_PAGE
         @top_index += 1
@@ -438,7 +576,7 @@ class PokemonHabitatRadar_Scene
   end
 
   def cursor_up
-    return if @pokemon_list.empty?
+    return if @filtered_list.empty?
     if @selected_index > 0
       @selected_index -= 1
       if @selected_index < @top_index
@@ -466,7 +604,7 @@ class PokemonHabitatRadar_Scene
     overlay = @sprites["overlay"].bitmap
     overlay.clear
 
-    # FONT COMPATTO: size 20 invece del default 29 per evitare sovrapposizioni
+    # FONT COMPATTO E NITIDO: size 20
     overlay.font.size = 20
 
     textpos = []
@@ -474,73 +612,93 @@ class PokemonHabitatRadar_Scene
     c_white   = Color.new(245, 248, 255)
     c_shadow  = Color.new(10, 14, 20)
     c_cyan    = Color.new(65, 215, 255)
-    c_gold    = Color.new(255, 210, 45)
-    c_silver  = Color.new(165, 175, 195)
+    c_gold    = Color.new(255, 215, 50)
+    c_silver  = Color.new(150, 165, 185)
     c_red     = Color.new(255, 85, 85)
-    c_green   = Color.new(80, 230, 120)
+    c_green   = Color.new(75, 235, 125)
 
     # =====================================================================
-    # 1. HEADER (y=2, h=24)
+    # 1. HEADER (y=0..30)
     # =====================================================================
-    draw_panel(panel, 4, 2, 504, 24, Color.new(16, 22, 34), Color.new(55, 80, 115))
+    draw_panel(panel, 0, 0, 512, 30, Color.new(12, 17, 28), Color.new(35, 52, 78))
+    panel.fill_rect(0, 30, 512, 1, Color.new(0, 215, 255))
 
     map_name = HabitatRadarData.get_map_name(@map_id)
     display_name = map_name.length > 14 ? "#{map_name[0...12]}.." : map_name
     map_num = "#{@map_index + 1}/#{@all_encounter_maps.length}"
-    textpos << ["<< #{display_name} >> #{map_num}", 10, 4, 0, c_white, c_shadow]
+    textpos << ["[<] #{display_name} [>]", 8, 5, 0, c_white, c_shadow]
+    textpos << [map_num, 150, 7, 0, c_silver, c_shadow]
 
+    # Orario in-game & Fascia
+    draw_panel(panel, 210, 5, 114, 20, Color.new(32, 44, 20), Color.new(210, 180, 40))
+    time_str = HabitatRadarData.current_time_display
+    textpos << [time_str, 267, 7, 2, c_gold, c_shadow]
+
+    # Rapporto Pokédex
     total_sp = @pokemon_list.length
     caught_sp = @pokemon_list.count { |p| p[:owned] }
     if total_sp > 0
       pct = (caught_sp * 100.0 / total_sp).round
-      if caught_sp >= total_sp
-        textpos << ["100%!", 502, 4, 1, c_gold, c_shadow]
-      else
-        textpos << ["#{caught_sp}/#{total_sp} #{pct}%", 502, 4, 1, c_cyan, c_shadow]
-      end
+      pct_col = (caught_sp >= total_sp) ? c_gold : c_cyan
+      textpos << ["Catturati: #{caught_sp}/#{total_sp} (#{pct}%)", 504, 6, 1, pct_col, c_shadow]
     end
 
     # =====================================================================
-    # 2. LISTA POKEMON (x=4, y=28, w=240, h=292)
+    # 2. TAB FILTRI ORARI (y=34..52)
     # =====================================================================
-    draw_panel(panel, 4, 28, 240, 292, Color.new(14, 18, 28), Color.new(45, 65, 95))
+    tx = 8
+    FILTER_NAMES.each_with_index do |t_name, i|
+      tw = 76
+      is_cur_tab = (i == @filter_mode)
+      if is_cur_tab
+        draw_panel(panel, tx, 34, tw, 18, Color.new(0, 130, 205), Color.new(0, 225, 255))
+        textpos << [t_name, tx + (tw / 2), 36, 2, c_white, c_shadow]
+      else
+        draw_panel(panel, tx, 34, tw, 18, Color.new(18, 24, 38), Color.new(38, 50, 72))
+        textpos << [t_name, tx + (tw / 2), 36, 2, c_silver, c_shadow]
+      end
+      tx += 82
+    end
+
+    # Pulsante rapido [Z] Filtro
+    draw_panel(panel, 424, 34, 80, 18, Color.new(22, 34, 52), Color.new(0, 180, 230))
+    textpos << ["[Z] Filtro", 464, 36, 2, c_cyan, c_shadow]
+
+    # =====================================================================
+    # 3. LISTA POKEMON (x=8, y=56, w=240, h=294)
+    # =====================================================================
+    draw_panel(panel, 8, 56, 240, 294, Color.new(13, 17, 27), Color.new(35, 48, 72))
 
     CARDS_PER_PAGE.times { |i| @sprites["icon_#{i}"].visible = false }
 
-    if @pokemon_list.empty?
-      textpos << ["Nessun Pokemon", 124, 110, 2, c_silver, c_shadow]
-      textpos << ["in questa zona.", 124, 132, 2, c_silver, c_shadow]
-      textpos << ["Usa << / >> per", 124, 168, 2, c_cyan, c_shadow]
-      textpos << ["sfogliare le mappe.", 124, 190, 2, c_cyan, c_shadow]
+    f_count = @filtered_list.length
+    textpos << ["RADAR SELVATICI (#{f_count})", 14, 60, 0, c_cyan, c_shadow]
+
+    if @filtered_list.empty?
+      textpos << ["Nessun selvatico", 128, 140, 2, c_silver, c_shadow]
+      textpos << ["in questa fascia oraria.", 128, 160, 2, c_silver, c_shadow]
+      textpos << ["Premi [Z] per cambiare filtro", 128, 190, 2, c_cyan, c_shadow]
     else
       if @top_index > 0
-        textpos << ["^", 124, 30, 2, c_cyan, c_shadow]
-      end
-      if @top_index + CARDS_PER_PAGE < @pokemon_list.length
-        textpos << ["v Altro", 124, 298, 2, c_cyan, c_shadow]
+        textpos << ["^", 232, 60, 1, c_cyan, c_shadow]
       end
 
       CARDS_PER_PAGE.times do |slot_i|
         item_i = @top_index + slot_i
-        break if item_i >= @pokemon_list.length
+        break if item_i >= @filtered_list.length
 
-        item = @pokemon_list[item_i]
-        card_x = 8
-        card_y = 44 + (slot_i * 62)
+        item = @filtered_list[item_i]
+        card_x = 12
+        card_y = 78 + (slot_i * 62)
         card_w = 232
-        card_h = 56
+        card_h = 58
         is_sel = (item_i == @selected_index)
 
         if is_sel
-          draw_panel(panel, card_x, card_y, card_w, card_h, Color.new(28, 48, 76), Color.new(0, 220, 255))
+          draw_panel(panel, card_x, card_y, card_w, card_h, Color.new(24, 44, 72), Color.new(0, 220, 255))
           panel.fill_rect(card_x, card_y, 3, card_h, Color.new(0, 220, 255))
         else
-          draw_panel(panel, card_x, card_y, card_w, card_h, Color.new(20, 26, 40), Color.new(45, 58, 80))
-        end
-
-        # Pokeball icona cattura
-        if item[:owned] && @pokeballOwn && @pokeballOwn.bitmap
-          overlay.blt(card_x + 4, card_y + 14, @pokeballOwn.bitmap, Rect.new(0, 0, @pokeballOwn.width, @pokeballOwn.height))
+          draw_panel(panel, card_x, card_y, card_w, card_h, Color.new(18, 24, 38), Color.new(35, 48, 68))
         end
 
         # Icona Pokemon
@@ -549,43 +707,63 @@ class PokemonHabitatRadar_Scene
           if icon_sprite.species != item[:species]
             icon_sprite.species = item[:species]
           end
-          icon_sprite.x = card_x + 40
-          icon_sprite.y = card_y + 28
+          icon_sprite.x = card_x + 24
+          icon_sprite.y = card_y + 29
           icon_sprite.visible = true
           icon_sprite.color = item[:seen] ? Color.new(0, 0, 0, 0) : Color.new(0, 0, 0, 240)
         end
 
-        # Nome
-        p_name = item[:seen] ? item[:name] : "?????????"
-        p_col = is_sel ? c_white : Color.new(225, 230, 240)
-        textpos << [p_name, card_x + 68, card_y + 6, 0, p_col, c_shadow]
-
-        # Target GPS
-        if $PokemonGlobal && $PokemonGlobal.radar_tracked_species == item[:id]
-          textpos << ["GPS", card_x + card_w - 6, card_y + 6, 1, c_gold, c_shadow]
+        # Pokeball cattura (a sinistra del nome, mai sovrapposta allo sprite!)
+        name_x = card_x + 46
+        if item[:owned] && @pokeballOwn && @pokeballOwn.bitmap
+          overlay.stretch_blt(Rect.new(name_x, card_y + 7, 16, 16), @pokeballOwn.bitmap, Rect.new(0, 0, @pokeballOwn.width, @pokeballOwn.height))
+          name_x += 20
         end
 
-        # Livello e metodo
-        lvl = (item[:min_level] == item[:max_level]) ? "Lv#{item[:min_level]}" : "Lv#{item[:min_level]}-#{item[:max_level]}"
-        textpos << ["#{item[:primary_icon]} #{lvl}", card_x + 68, card_y + 28, 0, c_silver, c_shadow]
+        # Nome
+        p_name = item[:seen] ? item[:name] : "?????????"
+        p_col = is_sel ? c_white : Color.new(225, 232, 245)
+        textpos << [p_name, name_x, card_y + 5, 0, p_col, c_shadow]
 
-        # Percentuale
-        textpos << ["#{item[:max_chance]}%", card_x + card_w - 6, card_y + 28, 1, item[:rarity_color], c_shadow]
+        # Rarita e Percentuale
+        textpos << ["#{item[:max_chance]}% #{item[:rarity_tag]}", card_x + card_w - 6, card_y + 6, 1, item[:rarity_color], c_shadow]
+
+        # Metodo e Livello
+        lvl = (item[:min_level] == item[:max_level]) ? "Lv.#{item[:min_level]}" : "Lv.#{item[:min_level]}-#{item[:max_level]}"
+        textpos << ["#{item[:primary_icon]} #{lvl}", card_x + 46, card_y + 24, 0, Color.new(160, 175, 195), c_shadow]
+
+        # Indicatore Orario (cerchietto grafico a pixel)
+        dot_col = item[:active_now] ? c_green : Color.new(130, 145, 175)
+        panel.fill_rect(card_x + 47, card_y + 45, 6, 6, dot_col)
+        time_txt = item[:active_now] ? "ATTIVO ORA" : item[:time_tag]
+        time_col = item[:active_now] ? c_green : Color.new(140, 160, 195)
+        textpos << [time_txt, card_x + 58, card_y + 40, 0, time_col, c_shadow]
+
+        # GPS Target badge
+        if $PokemonGlobal && $PokemonGlobal.radar_tracked_species == item[:id]
+          textpos << ["[GPS]", card_x + card_w - 6, card_y + 40, 1, c_gold, c_shadow]
+        end
+      end
+
+      # Indicatore v Altro (posizionato dentro il pannello)
+      if @top_index + CARDS_PER_PAGE < @filtered_list.length
+        rem = f_count - @top_index - CARDS_PER_PAGE
+        textpos << ["v Altro (#{rem} rimanenti)", 128, 332, 2, c_cyan, c_shadow]
       end
     end
 
     # =====================================================================
-    # 3. PANNELLO DETTAGLIO (x=248, y=28, w=260, h=124)
+    # 4. PANNELLO DETTAGLIO (x=254, y=56, w=250, h=140)
     # =====================================================================
-    draw_panel(panel, 248, 28, 260, 124, Color.new(18, 24, 38), Color.new(50, 75, 110))
+    draw_panel(panel, 254, 56, 250, 140, Color.new(16, 22, 34), Color.new(45, 65, 95))
 
-    cur = (@pokemon_list.empty? || @selected_index >= @pokemon_list.length) ? nil : @pokemon_list[@selected_index]
+    cur = (@filtered_list.empty? || @selected_index >= @filtered_list.length) ? nil : @filtered_list[@selected_index]
 
     if cur
       is_seen = cur[:seen]
       sp_data = cur[:species_data]
 
-      # Battler sprite (carica solo se specie cambiata)
+      # Battler sprite
       if @current_battler_species != cur[:species]
         @current_battler_species = cur[:species]
         @sprites["battler"].visible = true
@@ -604,101 +782,138 @@ class PokemonHabitatRadar_Scene
       end
       @sprites["battler"].color = is_seen ? Color.new(0, 0, 0, 0) : Color.new(0, 0, 0, 255)
 
-      # Nome e numero dex
+      # Piedistallo luminoso sotto il battler
+      panel.fill_rect(270, 126, 52, 6, Color.new(24, 40, 65))
+      panel.fill_rect(276, 128, 40, 3, Color.new(32, 60, 95))
+
+      # Header card dettaglio
       dex_num = sprintf("#%03d", (sp_data.id_number rescue 0))
       name_str = is_seen ? cur[:name] : "?????????"
-      textpos << ["#{dex_num} #{name_str}", 254, 32, 0, c_white, c_shadow]
-      textpos << [cur[:rarity_tag], 504, 32, 1, cur[:rarity_color], c_shadow]
+      textpos << ["#{dex_num} #{name_str}", 260, 60, 0, c_white, c_shadow]
+      textpos << [cur[:rarity_tag], 498, 60, 1, cur[:rarity_color], c_shadow]
 
-      # Tipi (sotto il battler)
+      # Tipi (disposti verticalmente a sinistra sotto il battler)
       if is_seen && @typebitmap && @typebitmap.bitmap
         type1 = cur[:type1]
         type2 = cur[:type2]
         t1_num = type1 ? (GameData::Type.get(type1).id_number rescue 0) : nil
         t2_num = type2 ? (GameData::Type.get(type2).id_number rescue 0) : nil
-        if t1_num && t2_num
-          overlay.blt(264, 118, @typebitmap.bitmap, Rect.new(0, t1_num * 32, 96, 32))
-          overlay.blt(374, 118, @typebitmap.bitmap, Rect.new(0, t2_num * 32, 96, 32))
-        elsif t1_num
-          overlay.blt(320, 118, @typebitmap.bitmap, Rect.new(0, t1_num * 32, 96, 32))
+        if t1_num
+          overlay.stretch_blt(Rect.new(268, 140, 58, 20), @typebitmap.bitmap, Rect.new(0, t1_num * 32, 96, 32))
+        end
+        if t2_num
+          overlay.stretch_blt(Rect.new(268, 166, 58, 20), @typebitmap.bitmap, Rect.new(0, t2_num * 32, 96, 32))
         end
       elsif !is_seen
-        textpos << ["Tipo: ???", 378, 128, 2, c_silver, c_shadow]
+        textpos << ["Tipo: ???", 296, 150, 2, c_silver, c_shadow]
+      end
+
+      # Box Disponibilita a destra
+      if cur[:active_now]
+        draw_panel(panel, 342, 76, 154, 18, Color.new(18, 52, 32), Color.new(60, 220, 100))
+        panel.fill_rect(348, 82, 6, 6, c_green)
+        textpos << ["DISPONIBILE ORA", 360, 77, 0, c_green, c_shadow]
+      else
+        draw_panel(panel, 342, 76, 154, 18, Color.new(42, 28, 32), Color.new(180, 70, 70))
+        panel.fill_rect(348, 82, 6, 6, Color.new(220, 80, 80))
+        textpos << [cur[:time_tag].upcase, 360, 77, 0, Color.new(240, 160, 160), c_shadow]
+      end
+
+      # Elenco metodi e percentuali per questa specie
+      m_list = cur[:methods] || []
+      if m_list.length > 0
+        m1 = m_list[0]
+        textpos << ["#{m1[:base_label]} [#{m1[:time_label]}] #{m1[:chance]}%", 342, 98, 0, Color.new(225, 232, 245), c_shadow]
+        textpos << ["Livelli: #{cur[:min_level]} - #{cur[:max_level]}", 342, 113, 0, Color.new(150, 170, 195), c_shadow]
+      end
+      if m_list.length > 1
+        m2 = m_list[1]
+        textpos << ["#{m2[:base_label]} [#{m2[:time_label]}] #{m2[:chance]}%", 342, 130, 0, Color.new(180, 195, 220), c_shadow]
+      end
+      if m_list.length > 2
+        m3 = m_list[2]
+        textpos << ["#{m3[:base_label]} [#{m3[:time_label]}] #{m3[:chance]}%", 342, 146, 0, Color.new(180, 195, 220), c_shadow]
       end
 
       # ===================================================================
-      # 4. PANNELLO STATISTICHE (x=248, y=156, w=260, h=164)
+      # 5. PANNELLO STATISTICHE BASE & GPS (x=254, y=200, w=250, h=150)
       # ===================================================================
-      draw_panel(panel, 248, 156, 260, 164, Color.new(18, 24, 38), Color.new(50, 75, 110))
+      draw_panel(panel, 254, 200, 250, 150, Color.new(16, 22, 34), Color.new(45, 65, 95))
 
       if is_seen
-        textpos << ["STAT BASE", 254, 160, 0, c_cyan, c_shadow]
-        textpos << ["BST #{cur[:bst_total]}", 504, 160, 1, c_gold, c_shadow]
+        textpos << ["STATISTICHE BASE", 260, 204, 0, c_cyan, c_shadow]
+        textpos << ["BST #{cur[:bst_total]}", 498, 204, 1, c_gold, c_shadow]
 
         stats = [
-          [:hp,      "HP ", Color.new(70, 215, 110)],
-          [:attack,  "Atk", Color.new(250, 135, 50)],
+          [:hp,      "HP",  Color.new(75, 220, 115)],
+          [:attack,  "Atk", Color.new(250, 140, 50)],
           [:defense, "Def", Color.new(245, 205, 55)],
-          [:spatk,   "SpA", Color.new(50, 195, 250)],
-          [:spdef,   "SpD", Color.new(95, 125, 250)],
-          [:speed,   "Spe", Color.new(250, 85, 165)]
+          [:spatk,   "SpA", Color.new(55, 200, 250)],
+          [:spdef,   "SpD", Color.new(95, 130, 250)],
+          [:speed,   "Spe", Color.new(250, 90, 165)]
         ]
 
         stats.each_with_index do |st, idx|
           col = idx / 3
           row = idx % 3
-          bx = 254 + (col * 130)
-          by = 184 + (row * 22)
+          bx = 260 + (col * 120)
+          by = 224 + (row * 18)
           val = cur[st[0]] || 0
 
-          textpos << [st[1], bx, by, 0, c_silver, c_shadow]
-          textpos << ["#{val}", bx + 30, by, 0, c_white, c_shadow]
+          textpos << [st[1], bx, by, 0, Color.new(160, 175, 195), c_shadow]
+          textpos << ["#{val}", bx + 26, by, 0, Color.new(245, 248, 255), c_shadow]
 
-          bar_max = 52
-          bar_fill = (val * bar_max / 160.0).round.clamp(2, bar_max)
-          panel.fill_rect(bx + 62, by + 5, bar_max, 6, Color.new(35, 45, 60))
-          overlay.fill_rect(bx + 62, by + 5, bar_fill, 6, st[2])
+          bar_max = 48
+          bar_fill = (val * bar_max / 140.0).round.clamp(2, bar_max)
+          panel.fill_rect(bx + 52, by + 4, bar_max, 6, Color.new(28, 36, 50))
+          overlay.fill_rect(bx + 52, by + 4, bar_fill, 6, st[2])
         end
       else
-        textpos << ["STAT BASE", 254, 160, 0, c_cyan, c_shadow]
-        textpos << ["Cattura per rivelare", 378, 200, 2, c_silver, c_shadow]
-        textpos << ["le statistiche!", 378, 222, 2, c_silver, c_shadow]
+        textpos << ["STATISTICHE BASE", 260, 204, 0, c_cyan, c_shadow]
+        textpos << ["Cattura per rivelare", 379, 236, 2, c_silver, c_shadow]
+        textpos << ["le statistiche!", 379, 254, 2, c_silver, c_shadow]
       end
 
-      # Info extra
+      # Linea di separazione info GPS
+      panel.fill_rect(260, 282, 238, 1, Color.new(35, 48, 70))
+
+      # Altre mappe
       other = HabitatRadarData.count_other_maps_for_species(cur[:id], @map_id)
       if other == 0
-        textpos << ["Esclusivo!", 378, 256, 2, c_gold, c_shadow]
+        textpos << ["Esclusivo di quest'area!", 260, 288, 0, c_gold, c_shadow]
       else
-        textpos << ["In altre #{other} mappe", 378, 256, 2, c_cyan, c_shadow]
+        textpos << ["Presente in altre #{other} mappe", 260, 288, 0, c_cyan, c_shadow]
       end
 
+      # Prompt GPS
       is_target = ($PokemonGlobal && $PokemonGlobal.radar_tracked_species == cur[:id])
-      gps_text = is_target ? "C: Rimuovi GPS" : "C: Imposta GPS"
+      gps_text = is_target ? "C: Rimuovi Target GPS" : "C: Imposta come Target GPS"
       gps_col = is_target ? c_red : c_green
-      textpos << [gps_text, 378, 278, 2, gps_col, c_shadow]
+      textpos << [gps_text, 260, 308, 0, gps_col, c_shadow]
 
-      # GPS tracker attivo
+      # Stato GPS globale
       if $PokemonGlobal && $PokemonGlobal.radar_tracked_species
         t_name = "?"
         begin; t_name = GameData::Species.get($PokemonGlobal.radar_tracked_species).name; rescue; end
-        t_short = t_name.length > 10 ? "#{t_name[0...9]}.." : t_name
-        textpos << ["GPS: #{t_short}", 378, 300, 2, c_gold, c_shadow]
+        textpos << ["GPS: #{t_name}", 260, 328, 0, c_gold, c_shadow]
+      else
+        textpos << ["GPS: Nessun bersaglio", 260, 328, 0, Color.new(140, 155, 175), c_shadow]
       end
 
     else
       @sprites["battler"].visible = false
       @current_battler_species = nil
-      textpos << ["Nessun dettaglio", 378, 80, 2, c_silver, c_shadow]
-      draw_panel(panel, 248, 156, 260, 164, Color.new(18, 24, 38), Color.new(50, 75, 110))
-      textpos << ["Seleziona un percorso", 378, 230, 2, c_silver, c_shadow]
+      textpos << ["Nessun dettaglio", 379, 80, 2, c_silver, c_shadow]
+      draw_panel(panel, 254, 200, 250, 150, Color.new(16, 22, 34), Color.new(45, 65, 95))
+      textpos << ["Seleziona un percorso", 379, 260, 2, c_silver, c_shadow]
     end
 
     # =====================================================================
-    # 5. FOOTER (y=324, h=22)
+    # 6. FOOTER TOOLBAR (y=354..384, h=30)
     # =====================================================================
-    draw_panel(panel, 4, 324, 504, 22, Color.new(16, 22, 34), Color.new(55, 80, 115))
-    textpos << ["Scorri  << >> Mappe  C Azioni  Esc Esci", 256, 326, 2, c_white, c_shadow]
+    draw_panel(panel, 0, 354, 512, 30, Color.new(12, 16, 26), Color.new(35, 50, 75))
+    panel.fill_rect(0, 354, 512, 1, Color.new(0, 210, 255))
+    textpos << ["[< >] Mappe     [Frecce] Lista     [Z] Filtro Orario     [C] Azioni / GPS     [X] Esci", 256, 360, 2, c_white, c_shadow]
 
     pbDrawTextPositions(overlay, textpos)
   end
@@ -741,8 +956,7 @@ class PokemonHabitatRadarScreen
       elsif Input.trigger?(Input::JUMPDOWN)
         4.times { @scene.cursor_down }
       elsif Input.trigger?(Input::ACTION) || Input.trigger?(Input::SPECIAL)
-        pbSEPlay("GUI naming tab") rescue nil
-        pbOpenSearchPrompt
+        @scene.cycle_filter
       elsif Input.trigger?(Input::USE)
         pbHandleActionChoice
       elsif Input.trigger?(Input::BACK)
@@ -755,12 +969,13 @@ class PokemonHabitatRadarScreen
 
   # Gestione menu contestuale su card selezionata
   def pbHandleActionChoice
-    list = @scene.instance_variable_get(:@pokemon_list)
+    list = @scene.instance_variable_get(:@filtered_list)
     sel = @scene.instance_variable_get(:@selected_index)
 
     choices = []
     cmd_track   = -1
     cmd_routes  = -1
+    cmd_filter  = -1
     cmd_search  = -1
     cmd_cancel  = -1
 
@@ -779,6 +994,7 @@ class PokemonHabitatRadarScreen
       choices[cmd_routes = choices.length] = _INTL("Mostra tutti i percorsi di {1}", p_name)
     end
 
+    choices[cmd_filter = choices.length] = _INTL("Cambia Filtro Orario (Giorno/Notte)")
     choices[cmd_search = choices.length] = _INTL("Ricerca Globale Pokemon per Nome")
     choices[cmd_cancel = choices.length] = _INTL("Annulla")
 
@@ -792,13 +1008,15 @@ class PokemonHabitatRadarScreen
       else
         $PokemonGlobal.radar_tracked_species = cur_item[:id]
         pbSEPlay("itemlevel") rescue nil
-        pbMessage(_INTL("{1} impostato come Target!
-Riceverai un allarme quando apparira in battaglia!", cur_item[:name]))
+        pbMessage(_INTL("{1} impostato come Target!\nRiceverai un allarme quando apparira in battaglia!", cur_item[:name]))
       end
       @scene.refresh_ui
 
     elsif choice == cmd_routes && cur_item
       pbShowAllRoutesForSpecies(cur_item[:id], cur_item[:name])
+
+    elsif choice == cmd_filter
+      @scene.cycle_filter
 
     elsif choice == cmd_search
       pbOpenSearchPrompt

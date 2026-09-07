@@ -11,7 +11,7 @@
 ## 📋 Sommario
 
 - [Cos'è questo progetto](#-cosè-questo-progetto)
-- [Funzionalità esclusive](#-funzionalità-esclusive)
+- [Confronto: Vanilla vs Questa Versione (Tutte le Novità)](#️-confronto-vanilla-vs-questa-versione-tutte-le-novità)
 - [Traduzione Italiana — Dialoghi e Mosse](#-traduzione-italiana--dialoghi-e-mosse)
 - [Requisiti](#-requisiti)
 - [Installazione da zero](#-installazione-da-zero)
@@ -32,27 +32,78 @@
 
 Pokémon Infinite Fusion è un fan game gratuito basato su RPG Maker XP che permette di **fondere qualsiasi coppia di Pokémon** tra le generazioni 1-7+ (**576 Pokémon base**, per oltre **331.000 combinazioni di fusioni possibili**!).
 
-Questa versione aggiunge:
-- **Traduzione italiana** completa dei menù e dell'interfaccia
-- **Radar Habitat** — un nuovo strumento nel menù di pausa per esplorare tutti i Pokémon selvatici zona per zona
-- **Pokédex HTML** consultabile offline nel browser
-- **Launcher Remaster** con upscaling grafico tramite Magpie
-- **Supporto Randomizer** integrato
+Questa versione (a cura di **@orach977**) arricchisce l'esperienza originale introducendo la traduzione integrale in italiano, un Radar Habitat ridisegnato con ciclo giorno/notte e filtri dinamici, il visualizzatore di IV/EV e Natura nel riepilogo, indicatori di efficacia mosse in battaglia, anteprima avanzata a doppio esito per le fusioni DNA, remaster grafico GPU con Magpie e un sistema di installazione/aggiornamento one-click.
 
 ---
 
-## ✨ Funzionalità esclusive
+## ⚖️ Confronto: Vanilla vs Questa Versione (Tutte le Novità)
 
-| Funzione | Descrizione |
-|---|---|
-| 🇮🇹 **Localizzazione IT** | Interfaccia di gioco tradotta in italiano |
-| 📡 **Radar Habitat** | Menu completo con lista selvatici per mappa, statistiche base, tipi, rarità, percentuali di incontro, ricerca globale e sistema GPS di tracciamento |
-| ⚔️ **Efficacia Mosse in Battaglia** | Badge in tempo reale su ogni mossa durante la lotta (*Superefficace x2/x4, Efficace, Poco eff., Immune*) |
-| 📊 **Visualizzatore IV, EV e Natura** | Nel riepilogo del Pokémon (pag. Statistiche), premi il tasto Azione per visualizzare IV (0-31), EV (0-252) e modificatori Natura (+/-) |
-| 🧬 **Anteprima Fusione DNA Avanzata** | Confronto pre-fusione con BST (Statistiche Base), ruoli Testa/Corpo, abilità ereditabili e badge **★ Custom Sprite** |
-| 📖 **Pokédex HTML** | Pagina HTML offline con dati di tutti i 576 Pokémon base, apribile nel browser |
-| 🎨 **Remaster grafico** | Launcher con Magpie integrato per upscaling in tempo reale (ALT+F11) |
-| 🎲 **Randomizer** | Supporto completo per le modalità randomizzate del gioco |
+Per garantire la massima trasparenza verso giocatori e appassionati, la seguente guida illustra in dettaglio **cosa era già presente nel gioco base originale (Vanilla)** e **cosa è stato sviluppato, introdotto o riscritto da zero da me (@orach977)** in questo fork italiano.
+
+### 📊 Tabella di Confronto Rapido
+
+| Caratteristica / Funzione | 🎮 Versione Vanilla (Originale) | 🇮🇹 Questa Versione (@orach977) | Descrizione e Dettagli |
+|---|:---:|:---:|---|
+| **Lingua del Gioco** | Solo Inglese | 🟢 **100% Italiano** | Tradotti oltre 30.000 testi: dialoghi della trama, PNG, capipalestra, mosse, abilità, strumenti, bacche, MT, menu e Pokédex |
+| **Radar Habitat In-Game** | ❌ Assente | 🟢 **Sviluppato da zero (UI Dark Glass)** | Strumento nel menu di pausa: Pokémon per zona, orologio in-game, ciclo Giorno/Notte/Mattina, 5 filtri dinamici [Z], percentuali, statistiche base, GPS tracker e ricerca globale |
+| **Efficacia Mosse in Battaglia** | ❌ Assente | 🟢 **Integrata in tempo reale** | Durante la lotta, ogni mossa mostra un badge calcolato in tempo reale contro il tipo avversario (*Superefficace x2/x4, Efficace, Poco eff., Immune*) |
+| **Visualizzatore IV, EV e Natura** | ❌ Nascosti / Non consultabili | 🟢 **Integrato nel Riepilogo** | Tasto Azione [Z] nella Pagina Competenze del Pokémon per visualizzare IV (0-31), EV (0-252/510) e modificatori positivi/negativi della Natura |
+| **Anteprima Fusione DNA Avanzata** | ⚠️ Scheda base essenziale | 🟢 **Confronto a 2 Colonne Completo** | Anteprima a doppio esito (A+B vs B+A), calcolo BST, ruoli Testa/Corpo, abilità trasmissibili, statistiche base e badge ★ Custom Sprite |
+| **Pokédex Web Offline** | ❌ Assente | 🟢 **Incluso (`pokedex.html`)** | Pokédex interattivo standalone per browser senza connessione internet; include tutti i 576 Pokémon base con statistiche, tipi e filtri habitat |
+| **Remaster Grafico GPU (Magpie)** | ❌ Assente (Solo scaling pixel nativo) | 🟢 **Preconfigurato con 7 Profili** | Launcher `Avvia_Con_Remaster.bat` con Magpie DirectX 11 / HLSL (xBRZ 4x, MMPX, CAS) e risoluzione nativa 1x forzata all'avvio |
+| **Installatore & Auto-Update 1-Click** | ⚠️ Download manuale / Rischio conflitti | 🟢 **Script Automatico (`INSTALL_OR_UPDATE.bat`)** | Con Git embedded portatile: scarica, aggiorna o sincronizza il gioco con un click mantenendo sempre intatti i salvataggi in `%APPDATA%` |
+| **Correzioni di Stabilità RGSS** | ⚠️ Crash noti (`printf`, apostrofi) | 🟢 **Risolti e Ottimizzati** | Risolti crash di formattazione stringhe con caratteri accentati/apostrofi, rendering tipografico ottimizzato con font autentico Power Green |
+| **Numero Pokémon Base** | 576 Pokémon (Gen 1-7+) | 576 Pokémon (Gen 1-7+) | *Nativo Vanilla*: fedele al roster originale ufficiale di Infinite Fusion |
+| **Combinazioni di Fusione** | Oltre 331.000 fusioni + Triple fusioni | Oltre 331.000 fusioni + Triple fusioni | *Nativo Vanilla*: motore di fusione originale preservato e potenziato con le nuove interfacce |
+| **Regioni e Mappe** | Kanto, Johto, Isole Sevii | Kanto, Johto, Isole Sevii | *Nativo Vanilla*: tutte le aree, città, percorsi ed eventi narrativi originali fruibili al 100% in italiano |
+| **Randomizer & Modalità Sfida** | Integrato nel gioco | Sincronizzato con il Radar Habitat | *Nativo Vanilla*: il nostro Radar Habitat legge in tempo reale le tabelle del randomizer se attivo |
+
+---
+
+### 🎮 Cosa era già presente nel gioco Vanilla (Base Originale)
+Le seguenti funzionalità appartengono al geniale lavoro del team originale di **Pokémon Infinite Fusion** (guidato da *Schrrrup* e dalla community internazionale):
+1. **Motore Algoritmico delle Fusioni**: il sistema che combina qualsiasi coppia di Pokémon calcolandone tipi, statistiche, abilità e sprite ibridi.
+2. **Sprite Personalizzati della Community**: decine di migliaia di sprite realizzati a mano dagli artisti della community internazionale, affiancati dal generatore automatico.
+3. **Mappe e Trama Originale**: la campagna completa ambientata a Kanto e Johto, con l'inclusione delle Isole Sevii, missioni dei capipalestra, boss del Team Rocket e post-game.
+4. **Triple Fusioni**: gli speciali eventi di fusione a tre per i Pokémon leggendari (es. Zapmolcuno).
+5. **Modalità Native di Gioco**: la modalità Classica, la modalità Personalizzata con Randomizer nativo e le regole Nuzlocke opzionali integrate nell'engine.
+
+---
+
+### ⭐ Cosa ho sviluppato e introdotto io (@orach977)
+Tutto ciò che segue è stato **interamente progettato, programmato, tradotto o integrato in questo fork**:
+
+1. **Localizzazione Italiana Integrale (30.000+ testi)**:
+   - Traduzione completa di tutti i dialoghi della storia, conversazioni PNG, capipalestra, Superquattro e missioni secondarie (`Data/italian.dat`).
+   - Traduzione ufficiale italiana di tutti i nomi delle mosse, abilità, strumenti, bacche, MT e messaggi di stato in battaglia.
+   - Voci del Pokédex interamente tradotte in italiano.
+2. **Radar Habitat In-Game Ridisegnato (Dark Glass UI + Ciclo Giorno/Notte)**:
+   - Nuovo script nativo in Ruby/RGSS (`Data/Scripts/052_InfiniteFusion/Menus/HabitatRadar.rb`) accessibile dal menu di pausa.
+   - Interfaccia elegante **Dark Glass (512×384)** a tema scuro senza sovrapposizioni o difetti grafici.
+   - **Riconoscimento del Tempo e Ciclo Giornaliero**: orologio in tempo reale nell'header con indicatore di periodo (`MATTINA 🌅`, `GIORNO ☀️`, `NOTTE 🌙`).
+   - **5 Filtri Dinamici con tasto [Z]**: naviga istantaneamente tra *Tutti, Giorno, Notte, Mattina, Attivi Ora*.
+   - **Card Pokémon Ottimizzate**: icona Poké Ball per i catturati, dot a pixel indicante se il Pokémon è reperibile nell'orario corrente, metodo di cattura e intervallo di livello.
+   - **Pannello Dettagli Approfondito**: battler ad alta fedeltà, badge tipo impilati senza collisioni, tag disponibilità oraria, elenco di tutti i metodi di incontro per la zona, 6 statistiche base con barre grafiche proporzionali colorate e BST totale.
+   - **Tracciatore GPS e Ricerca Globale**: imposta un bersaglio da monitorare per ricevere un alert sonoro/visivo quando appare nell'erba, oppure cerca per nome (`[C]` o `[S]`) in quale mappa si nasconde qualsiasi Pokémon.
+3. **Indicatori di Efficacia Mosse in Tempo Reale nel Fight Menu**:
+   - Menu di combattimento ridisegnato: analizza la combinazione di tipi del Pokémon avversario attivo e applica badge dinamici colorati su ogni mossa (*Superefficace x2 / x4, Efficace x1, Poco efficace x0.5 / x0.25, Immune x0*).
+4. **Visualizzatore IV, EV e Natura nel Riepilogo**:
+   - Modifica al menu `UI_Summary`: premendo il tasto Azione **[Z]** nella schermata delle statistiche (Pagina 3 Competenze), visualizza i valori individuali esatti (IV 0-31), i punti allenamento (EV 0-252 su 510) e i modificatori della Natura (+10% in verde / -10% in rosso).
+5. **Anteprima Fusione DNA a Doppio Esito & Scheda Dettagli a Due Colonne**:
+   - Anteprima simultanea che mette a confronto entrambe le varianti (Testa A + Corpo B vs Testa B + Corpo A) con tipi risultanti e totale statistiche (BST).
+   - Scheda Dettagli espansa premendo **Z** o **Shift**: visualizzazione pulita su due colonne affiancate senza testo compresso o sovrapposto, con ruoli anatomici, statistiche base complete, abilità selezionabili e badge per sprite personalizzati (**★ Custom Sprite**).
+6. **Remaster Grafico GPU con Magpie (7 Profili Shader HLSL)**:
+   - Integrazione completa del motore Magpie con avvio one-click (`Avvia_Con_Remaster.bat`).
+   - Forzatura automatica della finestra di gioco a 1x nativo (dimensione schermo M, 512×384) per evitare pre-scaling difettoso dell'engine RGSS prima del passaggio alla GPU.
+   - 7 profili personalizzati creati e ottimizzati per Infinite Fusion: *xBRZ 4x Ultra-HD Smooth, Pixel Art Next-Level RTX (MMPX + CAS), Anime HD, CRT Vintage, ecc.*
+7. **Pokédex Web Standalone Offline (`pokedex.html`)**:
+   - Applicazione web HTML5/JS reattiva per consultare offline tutti i 576 Pokémon base, con ricerca istantanea, statistiche base, filtri habitat e sincronizzazione.
+8. **Script di Installazione e Aggiornamento 1-Click con Git Portatile**:
+   - `INSTALL_OR_UPDATE.bat` include una versione portatile e autonoma di Git in `REQUIRED_BY_INSTALLER_UPDATER/`, consentendo l'installazione e gli aggiornamenti con un click a chiunque senza installare software di terze parti.
+   - Protezione nativa dei dati di salvataggio memorizzati nella cartella di sistema `%APPDATA%\infinitefusion`.
+9. **Fix Architetturali dell'Engine RGSS**:
+   - Correzione dei crash dell'interprete Ruby su stringhe italiane contenenti simboli `%` o apostrofi speciali.
+   - Ripristino e allineamento dei font authentic (`Power Green`), eliminando caratteri mancanti o quadrati bianchi `[]`.
 
 ---
 
@@ -202,55 +253,69 @@ Il **Radar Habitat** è uno strumento esclusivo di questa versione, accessibile 
   <img src="docs/screenshots/menu_pausa_it.png" alt="Menu di Pausa con Radar Habitat" width="35%">
 </p>
 
-### Interfaccia
+### Nuova Interfaccia Dark Glass con Ciclo Giorno / Notte
 
 <p align="center">
-  <img src="docs/screenshots/radar_habitat.png" alt="Radar Habitat In-Game UI" width="85%">
+  <img src="docs/screenshots/radar_habitat.png" alt="Radar Habitat In-Game UI Dark Glass" width="90%">
 </p>
 
-L'interfaccia è divisa in 4 aree:
+L'interfaccia è stata completamente riprogettata in stile **Dark Glass (512×384)** a tema scuro ad alto contrasto ed è suddivisa in 4 aree principali:
 
-| Area | Contenuto |
+| Area | Descrizione |
 |---|---|
-| **Header** (in alto) | Nome mappa corrente, contatore mappe, percentuale cattura |
-| **Lista Pokémon** (sinistra) | 4 card scrollabili con nome, icona, livello, tipo di incontro, rarità % |
-| **Dettaglio** (destra in alto) | Sprite del Pokémon selezionato, numero Pokédex, tipi, rarità |
-| **Statistiche** (destra in basso) | Statistiche base (HP, ATK, DEF, SpA, SpD, Spe), BST totale, esclusività mappa |
+| **Header (In alto)** | Mostra il nome della mappa corrente con frecce di navigazione (`◄ Mappa ►`), l'orologio interno del gioco sincronizzato con il periodo solare attivo (**`14:30 GIORNO ☀️`**, `07:15 MATTINA 🌅`, `22:00 NOTTE 🌙`) e la percentuale di cattura locale. |
+| **Tab Bar Filtri (In alto)** | Premendo il tasto **`[Z]`**, puoi ciclare istantaneamente tra 5 filtri: **`TUTTI`**, **`GIORNO`**, **`NOTTE`**, **`MATTINA`** e **`ATTIVI ORA`**. La lista si aggiorna in tempo reale mostrando solo le specie corrispondenti alla fascia oraria selezionata. |
+| **Lista Pokémon (A sinistra)** | Card ad alto contrasto per ogni Pokémon della zona con: icona Poké Ball (se catturato), **pallino di disponibilità colorato** (verde se reperibile adesso sul posto, grigio scuro se attivo in un'altra fascia oraria), sprite ufficiale, nome, metodo di incontro principale e livello. |
+| **Pannello Dettagli (A destra)** | Battler ufficiale ad alta definizione, badge dei tipi (impilati verticalmente con stile moderno), **pillola oraria di disponibilità** (`DISPONIBILE ORA` / `SOLO NOTTE` / `SOLO GIORNO` / `SOLO MATTINA`), elenco completo di tutti i metodi di incontro della mappa (Erba, Acqua, Pesca, ecc.), e **6 statistiche base** con barre colorate proporzionali e indicatore BST totale. |
 
 ### Controlli del Radar
 
 | Tasto | Azione |
 |---|---|
-| **▲ / ▼** | Scorri la lista Pokémon (tieni premuto per scorrere veloce!) |
-| **◄ / ►** | Cambia mappa (scorri tutte le zone di gioco) |
-| **Z / Invio** | Apri menù azioni (Imposta GPS, Mostra tutti i percorsi) |
-| **C / S** | Ricerca globale per nome |
-| **X / Esc** | Esci dal Radar |
+| **▲ / ▼** | Scorri la lista Pokémon (tieni premuto per scorrere rapidamente) |
+| **◄ / ►** | Cambia mappa (esplora qualsiasi percorso, città o grotta del gioco) |
+| **Z** | **Cambia Filtro Orario** (`Tutti` → `Giorno` → `Notte` → `Mattina` → `Attivi Ora`) |
+| **Invio** | Apri menù contestuale (**Imposta come Target GPS**, Mostra tutti i percorsi) |
+| **C / S** | **Ricerca Globale**: cerca un Pokémon per nome per scoprire dove trovarlo nel mondo |
+| **X / Esc** | Chiudi ed esci dal Radar |
 
-### Funzione GPS (Tracciamento Target)
+### ☀️ Ciclo Giorno / Notte e Fasce Orarie
+
+Molti Pokémon compaiono solo in determinati orari del giorno. Il Radar analizza automaticamente ogni specie e metodo di incontro:
+
+| Fascia Oraria | Icona | Orario In-Game | Note ed Esempi |
+|---|:---:|:---:|---|
+| **Mattina** | 🌅 | 04:00 — 09:59 | Specie mattutine come Ledyba, Spinarak o incontri dedicati all'alba |
+| **Giorno** | ☀️ | 10:00 — 19:59 | Pidgey, Oddish, Clefairy, Sunkern e specie diurne |
+| **Notte** | 🌙 | 20:00 — 03:59 | Gastly, Zubat, Hoothoot, Murkrow e Pokémon notturni |
+| **Sempre** | ⭐ | 24 Ore / Grotte | Pokémon delle caverne (es. Geodude, Zubat), surf e pesca |
+
+> 💡 **Suggerimento - Filtro "Attivi Ora"**: premendo **Z** fino a selezionare *Attivi Ora*, vedrai unicamente i Pokémon che puoi catturare in questo esatto momento nella mappa in cui ti trovi, evitando di cercare a vuoto specie notturne durante il giorno!
+
+### 🎯 Funzione GPS (Tracciamento Target)
 1. Seleziona un Pokémon nella lista
-2. Premi **Invio** → **"Imposta come Target GPS"**
-3. Quando quel Pokémon apparirà in un combattimento selvatico, riceverai un **avviso sonoro e visivo** automatico!
-4. L'indicatore GPS appare nell'header del Radar
+2. Premi **Invio** → seleziona **"Imposta come Target GPS"**
+3. Quando il Pokémon tracciato appare in un combattimento selvatico nell'erba, riceverai un **avviso acustico e visivo** immediato a inizio scontro!
+4. Il Pokémon target rimarrà evidenziato con un indicatore GPS dedicato nell'header.
 
-### Funzione Ricerca Globale
-1. Premi **C** o **S** nel Radar
-2. Digita il nome del Pokémon che cerchi (anche parziale)
-3. Verrà mostrata la lista di **tutte le mappe** dove quel Pokémon appare, ordinate per percentuale di incontro
+### 🔍 Funzione Ricerca Globale
+1. Premi **C** o **S** all'interno del Radar
+2. Digita il nome del Pokémon desiderato (anche solo lettere parziali, es. `Pik`)
+3. Il Radar elencherà istantaneamente **tutte le mappe del gioco** dove quel Pokémon è presente, con i rispettivi metodi e percentuali di incontro ordinati dal più comune al più raro.
 
-### Indicatori di rarità
+### 📊 Indicatori di Rarità
 
 | Tag | Colore | Significato |
 |---|---|---|
-| COMUNE | Verde | Oltre 20% di probabilità |
-| NON COMUNE | Giallo | 10% — 20% |
-| RARO | Arancione | 5% — 9% |
-| MOLTO RARO | Rosso | Sotto il 5% |
+| COMUNE | Verde | Oltre 20% di probabilità di incontro |
+| NON COMUNE | Giallo | 10% — 20% di probabilità |
+| RARO | Arancione | 5% — 9% di probabilità |
+| MOLTO RARO | Rosso | Sotto il 5% (specie molto rare) |
 
-### Note tecniche
-- Il Radar **non causa input lag**: i dati delle mappe sono cacheati in memoria e le icone vengono ricaricate solo quando cambiano
-- Compatibile con il **Randomizer**: se attivo, il Radar mostra gli incontri randomizzati
-- Se un Pokémon non è ancora stato visto, apparirà come **"?????????"** con silhouette nera
+### 🛠️ Note tecniche e prestazioni
+- **Nessun input lag**: i dati delle mappe sono memorizzati nella cache in memoria e gli sprite vengono liberati correttamente quando non più visibili.
+- **Compatibile con il Randomizer**: se la modalità randomizzata è attiva, il Radar legge dinamicamente i dati generati da `Data/encounters_randomized.dat`.
+- **Dati non visti**: se un Pokémon non è ancora stato registrato o visto nel Pokédex, appare come **"?????????"** con silhouette oscurata per evitare spoiler.
 
 ---
 
