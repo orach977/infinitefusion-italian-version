@@ -47,6 +47,9 @@ Questa versione aggiunge:
 |---|---|
 | 🇮🇹 **Localizzazione IT** | Interfaccia di gioco tradotta in italiano |
 | 📡 **Radar Habitat** | Menu completo con lista selvatici per mappa, statistiche base, tipi, rarità, percentuali di incontro, ricerca globale e sistema GPS di tracciamento |
+| ⚔️ **Efficacia Mosse in Battaglia** | Badge in tempo reale su ogni mossa durante la lotta (*Superefficace x2/x4, Efficace, Poco eff., Immune*) |
+| 📊 **Visualizzatore IV, EV e Natura** | Nel riepilogo del Pokémon (pag. Statistiche), premi il tasto Azione per visualizzare IV (0-31), EV (0-252) e modificatori Natura (+/-) |
+| 🧬 **Anteprima Fusione DNA Avanzata** | Confronto pre-fusione con BST (Statistiche Base), ruoli Testa/Corpo, abilità ereditabili e badge **★ Custom Sprite** |
 | 📖 **Pokédex HTML** | Pagina HTML offline con dati di tutti i 576 Pokémon base, apribile nel browser |
 | 🎨 **Remaster grafico** | Launcher con Magpie integrato per upscaling in tempo reale (ALT+F11) |
 | 🎲 **Randomizer** | Supporto completo per le modalità randomizzate del gioco |
