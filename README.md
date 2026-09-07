@@ -125,11 +125,28 @@ Tutti i nomi delle mosse, i tipi di appartenenza, i valori di PP e i messaggi in
   <img src="docs/screenshots/battaglia_mosse_it.png" alt="Battaglia con mosse in italiano" width="85%">
 </p>
 
-### 💬 Dialoghi, Trama e PNG
-I dialoghi della storia, i testi dei capipalestra, le missioni secondarie e le interazioni nell'overworld sono completamente in italiano:
+### 💬 Dialoghi, Trama, Capipalestra e Missioni
+Tutti i testi di gioco sono localizzati in italiano: dialoghi narrativi della storia, lore e curiosità di Kanto e Johto, targhe e battaglie dei capipalestra, attivazione e ricompense delle missioni secondarie negli hotel:
 
+#### 🏛️ Capipalestra e Palestre Pokémon
 <p align="center">
-  <img src="docs/screenshots/dialogo_storia_it.png" alt="Dialoghi e storia in italiano" width="85%">
+  <img src="docs/screenshots/capopalestra_erika.png" alt="Targa Palestra Erika in italiano" width="48%">
+  &nbsp;
+  <img src="docs/screenshots/capopalestra_dialogo.png" alt="Dialogo Capopalestra Erika in italiano" width="48%">
+</p>
+
+#### 📜 Missioni Secondarie e Ricompense
+<p align="center">
+  <img src="docs/screenshots/missione_nuova_it.png" alt="Notifica Nuova Missione Secondaria" width="48%">
+  &nbsp;
+  <img src="docs/screenshots/missione_secondaria_it.png" alt="Ricompensa Missione Secondaria" width="48%">
+</p>
+
+#### 📖 Trama Principale e Lore del Mondo di Gioco
+<p align="center">
+  <img src="docs/screenshots/dialogo_storia_it.png" alt="Dialoghi della trama principale in italiano" width="48%">
+  &nbsp;
+  <img src="docs/screenshots/infotainment_lavandonia_it.png" alt="Lore e leggende locali in italiano" width="48%">
 </p>
 
 ### 📖 Pokédex In-Game Tradotto
@@ -348,8 +365,12 @@ Il file **`pokedex.html`** nella cartella del gioco è un Pokédex interattivo c
 [Magpie](https://github.com/Blinue/Magpie) è un motore di upscaling e post-processing in tempo reale basato su shader DirectX 11 / HLSL. In questa versione è **già integrato e preconfigurato** nella cartella `Magpie/` per sfruttare al meglio le moderne GPU (NVIDIA GeForce RTX/GTX, AMD Radeon, Intel Arc).
 
 <p align="center">
-  <img src="docs/screenshots/magpie_profili_upscaling.png" alt="Selettore Profili di Upscaling Magpie" width="85%">
+  <img src="docs/screenshots/magpie_profili_upscaling.png" alt="Selettore Profili di Upscaling Magpie" width="48%">
+  &nbsp;
+  <img src="docs/screenshots/magpie_metriche.png" alt="Monitoraggio Prestazioni in Gioco con Magpie e Shader HLSL" width="48%">
 </p>
+
+> ⚡ **Prestazioni Hardware Verificate**: L'overlay integrato di monitoraggio dimostra l'efficienza della catena di shader (`xBRZ_4x` + `SharpBilinear` + `CAS` + `ImageAdjustment`): **60 FPS granitici** con un frametime totale di appena **~3,3 millisecondi** su GPU discrete (es. NVIDIA GeForce RTX).
 
 ### 🚀 Come avviare e usare il Remaster
 1. Fai doppio click su **`Avvia_Con_Remaster.bat`** (oppure avvia manualmente `Magpie/Magpie.exe` e poi `Game.exe`).
