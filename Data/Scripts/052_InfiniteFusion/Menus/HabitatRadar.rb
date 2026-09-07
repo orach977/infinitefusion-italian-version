@@ -291,9 +291,10 @@ module HabitatRadarData
       item[:active_now] = item[:methods].any? { |m| m[:active_now] }
 
       if has_time_split
-        item[:has_day]     = item[:methods].any? { |m| [:day, :afternoon].include?(m[:time_category]) }
-        item[:has_night]   = item[:methods].any? { |m| [:night, :evening].include?(m[:time_category]) }
-        item[:has_morning] = item[:methods].any? { |m| m[:time_category] == :morning }
+        has_any = item[:methods].any? { |m| m[:time_category] == :any }
+        item[:has_day]     = has_any || item[:methods].any? { |m| [:day, :afternoon].include?(m[:time_category]) }
+        item[:has_night]   = has_any || item[:methods].any? { |m| [:night, :evening].include?(m[:time_category]) }
+        item[:has_morning] = has_any || item[:methods].any? { |m| m[:time_category] == :morning }
       else
         item[:has_day]     = true
         item[:has_night]   = true
@@ -533,19 +534,28 @@ class PokemonHabitatRadar_Scene
       case @filter_mode
       when FILTER_DAY
         if has_split
-          matching_methods = p[:methods].select { |m| [:day, :afternoon].include?(m[:time_category]) }
+          # Includi metodi specifici GIORNO + metodi "sempre" (:any)
+          matching_methods = p[:methods].select { |m|
+            [:day, :afternoon, :any].include?(m[:time_category])
+          }
         else
           matching_methods = p[:methods]
         end
       when FILTER_NIGHT
         if has_split
-          matching_methods = p[:methods].select { |m| [:night, :evening].include?(m[:time_category]) }
+          # Includi metodi specifici NOTTE + metodi "sempre" (:any)
+          matching_methods = p[:methods].select { |m|
+            [:night, :evening, :any].include?(m[:time_category])
+          }
         else
           matching_methods = p[:methods]
         end
       when FILTER_MORNING
         if has_split
-          matching_methods = p[:methods].select { |m| m[:time_category] == :morning }
+          # Includi metodi specifici MATTINA + metodi "sempre" (:any)
+          matching_methods = p[:methods].select { |m|
+            [:morning, :any].include?(m[:time_category])
+          }
         else
           matching_methods = p[:methods]
         end
@@ -558,7 +568,10 @@ class PokemonHabitatRadar_Scene
 
       next if matching_methods.empty?
 
-      best_m = matching_methods.max_by { |m| m[:chance] } || matching_methods[0]
+      # Preferisci il metodo time-specifico per il display, se esiste
+      time_specific = matching_methods.reject { |m| m[:time_category] == :any }
+      best_source = time_specific.empty? ? matching_methods : time_specific
+      best_m = best_source.max_by { |m| m[:chance] } || matching_methods[0]
 
       filtered_item = p.dup
       filtered_item[:display_chance] = best_m[:chance]

@@ -153,15 +153,15 @@
                 {
                     "name": "CAS\\CAS",
                     "parameters": {
-                        "sharpness": 0.2
+                        "sharpness": 0.20000000298023224
                     }
                 },
                 {
                     "name": "ImageAdjustment",
                     "parameters": {
-                        "saturation": 1.15,
-                        "contrast": 1.06,
-                        "brightBoost": 0.01
+                        "saturation": 1.149999976158142,
+                        "contrast": 1.059999942779541,
+                        "brightBoost": 0.009999999776482582
                     }
                 }
             ]
@@ -180,15 +180,15 @@
                 {
                     "name": "CAS\\CAS",
                     "parameters": {
-                        "sharpness": 0.2
+                        "sharpness": 0.20000000298023224
                     }
                 },
                 {
                     "name": "ImageAdjustment",
                     "parameters": {
-                        "saturation": 1.15,
-                        "contrast": 1.06,
-                        "brightBoost": 0.01
+                        "saturation": 1.149999976158142,
+                        "contrast": 1.059999942779541,
+                        "brightBoost": 0.009999999776482582
                     }
                 }
             ]
@@ -215,9 +215,9 @@
                 {
                     "name": "ImageAdjustment",
                     "parameters": {
-                        "saturation": 1.15,
-                        "contrast": 1.06,
-                        "brightBoost": 0.01
+                        "saturation": 1.149999976158142,
+                        "contrast": 1.059999942779541,
+                        "brightBoost": 0.009999999776482582
                     }
                 }
             ]
@@ -370,7 +370,7 @@
                 "hArea": 2,
                 "vArea": 1,
                 "hPos": 60.0,
-                "vPos": 0.5
+                "vPos": 0.49953705072402954
             }
         }
     }
