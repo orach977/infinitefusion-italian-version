@@ -444,6 +444,8 @@ class PokemonSummary_Scene
 
       textpos << [_INTL("Body"), 238, fusion_body_y, 0, base, shadow]
       textpos << [bodyName, 435, fusion_body_y, 2, @text_color_base, @text_color_shadow]
+
+      textpos << [_INTL("[Z: Anteprima Fusione]"), 435, fusion_body_y + 24, 2, Color.new(100, 220, 255), Color.new(20, 50, 90)]
     else
       dexnum = GameData::Species.get(@pokemon.species).id_number
       textpos << [_INTL("Dex No"), 238, fusion_head_y, 0, base, shadow]
@@ -764,7 +766,7 @@ class PokemonSummary_Scene
     else
       # Modalità 0: Statistiche normali
       textpos = [
-        [_INTL("[Z/C: IV/EV]"), 420, 44, 2, Color.new(200, 200, 200), Color.new(70, 70, 70)],
+        [_INTL("[Z: IV/EV]"), 420, 44, 2, Color.new(160, 210, 255), Color.new(30, 60, 90)],
         [_INTL("HP"), 292, 70, 2, base, statshadows[:HP]],
         [sprintf("%d/%d", @pokemon.hp, @pokemon.totalhp), 462, 70, 1, @text_color_base, @text_color_shadow],
         [_INTL("Attack") + nature_marks[:ATTACK], 248, 114, 0, base, statshadows[:ATTACK]],
@@ -1464,6 +1466,97 @@ class PokemonSummary_Scene
     return (selmove == Pokemon::MAX_MOVES) ? -1 : selmove
   end
 
+  def pbShowFusionSummaryDetail
+    return if !@pokemon || !@pokemon.isFusion?
+    pbPlayDecisionSE rescue nil
+
+    head_id = @pokemon.species_data.get_head_species
+    body_id = @pokemon.species_data.get_body_species
+    head_sp = GameData::Species.get(head_id)
+    body_sp = GameData::Species.get(body_id)
+    return if !head_sp || !body_sp
+
+    viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
+    viewport.z = 999999
+    overlay_sprite = BitmapSprite.new(Graphics.width, Graphics.height, viewport)
+    overlay = overlay_sprite.bitmap
+    pbSetNarrowFont(overlay)
+
+    # Sfondo scuro semitrasparente e cornice elegante
+    overlay.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(10, 14, 24, 235))
+    overlay.fill_rect(12, 12, Graphics.width - 24, Graphics.height - 24, Color.new(20, 26, 42, 245))
+    overlay.fill_rect(12, 12, Graphics.width - 24, 2, Color.new(70, 130, 220))
+    overlay.fill_rect(12, Graphics.height - 14, Graphics.width - 24, 2, Color.new(70, 130, 220))
+    overlay.fill_rect(12, 12, 2, Graphics.height - 24, Color.new(70, 130, 220))
+    overlay.fill_rect(Graphics.width - 14, 12, 2, Graphics.height - 24, Color.new(70, 130, 220))
+
+    base_col   = Color.new(245, 245, 245)
+    shadow_col = Color.new(40, 40, 50)
+    textpos = [
+      [_INTL("COMPOSIZIONE DELLA FUSIONE"), Graphics.width / 2, 20, 2, Color.new(255, 220, 80), Color.new(100, 70, 0)],
+      [@pokemon.name, Graphics.width / 2, 42, 2, base_col, shadow_col]
+    ]
+
+    # Riquadro Testa (Head) a sinistra
+    overlay.fill_rect(24, 68, 224, 130, Color.new(30, 40, 62))
+    textpos << [_INTL("TESTA (HEAD)"), 136, 74, 2, Color.new(120, 210, 255), shadow_col]
+    textpos << [head_sp.real_name, 136, 94, 2, base_col, shadow_col]
+    head_type_str = GameData::Type.get(head_sp.type1).name
+    head_type_str += " / " + GameData::Type.get(head_sp.type2).name if head_sp.type1 != head_sp.type2
+    textpos << [_INTL("Tipo: {1}", head_type_str), 136, 116, 2, Color.new(200, 200, 210), shadow_col]
+    head_bst = head_sp.base_stats.values.sum rescue 0
+    textpos << [sprintf("BST: %d  |  No. %03d", head_bst, head_sp.id_number), 136, 138, 2, Color.new(180, 230, 160), shadow_col]
+    textpos << [_INTL("Contribuisce a Sp.Atk, Sp.Def, Spd"), 136, 162, 2, Color.new(180, 185, 195), shadow_col]
+
+    # Riquadro Corpo (Body) a destra
+    overlay.fill_rect(264, 68, 224, 130, Color.new(30, 40, 62))
+    textpos << [_INTL("CORPO (BODY)"), 376, 74, 2, Color.new(255, 160, 120), shadow_col]
+    textpos << [body_sp.real_name, 376, 94, 2, base_col, shadow_col]
+    body_type_str = GameData::Type.get(body_sp.type1).name
+    body_type_str += " / " + GameData::Type.get(body_sp.type2).name if body_sp.type1 != body_sp.type2
+    textpos << [_INTL("Tipo: {1}", body_type_str), 376, 116, 2, Color.new(200, 200, 210), shadow_col]
+    body_bst = body_sp.base_stats.values.sum rescue 0
+    textpos << [sprintf("BST: %d  |  No. %03d", body_bst, body_sp.id_number), 376, 138, 2, Color.new(180, 230, 160), shadow_col]
+    textpos << [_INTL("Contribuisce a HP, Atk, Def"), 376, 162, 2, Color.new(180, 185, 195), shadow_col]
+
+    # Riquadro Fusione Inversa (Reverse) in basso
+    reversed_id = (body_sp.id_number * NB_POKEMON) + head_sp.id_number
+    reversed_sp = GameData::Species.get(reversed_id) rescue nil
+    overlay.fill_rect(24, 212, 464, 114, Color.new(25, 34, 52))
+    textpos << [_INTL("FUSIONE ALTERNATIVA (CORPO + TESTA SCAMBIATI)"), Graphics.width / 2, 218, 2, Color.new(255, 215, 60), shadow_col]
+    if reversed_sp
+      rev_name = reversed_sp.real_name
+      rev_type_str = GameData::Type.get(reversed_sp.type1).name
+      rev_type_str += " / " + GameData::Type.get(reversed_sp.type2).name if reversed_sp.type1 != reversed_sp.type2
+      rev_bst = reversed_sp.base_stats.values.sum rescue 0
+      rev_has_custom = customSpriteExists(head_sp.id_number, body_sp.id_number) rescue false
+
+      textpos << [sprintf("%s  -  Tipo: %s  -  BST: %d", rev_name, rev_type_str, rev_bst), Graphics.width / 2, 244, 2, base_col, shadow_col]
+      badge_str = rev_has_custom ? _INTL("★ Ha uno Sprite Custom dedicato!") : _INTL("Sprite Autogenerato")
+      badge_col = rev_has_custom ? Color.new(255, 215, 0) : Color.new(180, 180, 190)
+      textpos << [badge_str, Graphics.width / 2, 268, 2, badge_col, shadow_col]
+      textpos << [_INTL("Testa: {1} | Corpo: {2}", body_sp.real_name, head_sp.real_name), Graphics.width / 2, 292, 2, Color.new(190, 200, 220), shadow_col]
+    end
+
+    # Barra di chiusura in fondo
+    textpos << [_INTL("[Z / C / X]: Chiudi anteprima"), Graphics.width / 2, 344, 2, Color.new(120, 220, 255), shadow_col]
+
+    pbDrawTextPositions(overlay, textpos)
+
+    # Event loop
+    loop do
+      Graphics.update
+      Input.update
+      if Input.trigger?(Input::USE) || Input.trigger?(Input::BACK) || Input.trigger?(Input::ACTION) || Input.trigger?(Input::JUMPUP)
+        pbPlayCloseMenuSE rescue pbPlayDecisionSE
+        break
+      end
+    end
+
+    overlay_sprite.dispose
+    viewport.dispose
+  end
+
   def pbScene
     @pokemon.play_cry
     loop do
@@ -1471,10 +1564,13 @@ class PokemonSummary_Scene
       Input.update
       pbUpdate
       dorefresh = false
-      if Input.trigger?(Input::ACTION)
+      if Input.trigger?(Input::ACTION) || Input.trigger?(Input::JUMPUP)
         if @page == 3
           @stat_display_mode = ((@stat_display_mode || 0) + 1) % 3
-          pbSEPlay("GUI summary change page")
+          pbSEPlay("GUI summary change page") rescue pbPlayDecisionSE
+          dorefresh = true
+        elsif @page == 1 && @pokemon.isFusion?
+          pbShowFusionSummaryDetail
           dorefresh = true
         else
           pbSEStop

@@ -45,6 +45,6 @@ class FusionPreviewScreen < DoublePreviewScreen
   end
 
   def getBackgroundPicture
-    super
+    return BACKGROUND_PATH
   end
 end

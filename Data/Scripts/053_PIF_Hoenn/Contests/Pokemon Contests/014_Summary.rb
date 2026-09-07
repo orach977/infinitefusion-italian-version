@@ -194,9 +194,18 @@ class PokemonSummary_Scene
 		  Input.update
 		  pbUpdate
 		  dorefresh = false
-		  if Input.trigger?(Input::ACTION)
-			pbSEStop
-			@pokemon.play_cry
+		  if Input.trigger?(Input::ACTION) || Input.trigger?(Input::JUMPUP)
+			if @page == 3
+			  @stat_display_mode = ((@stat_display_mode || 0) + 1) % 3
+			  pbSEPlay("GUI summary change page") rescue pbPlayDecisionSE
+			  dorefresh = true
+			elsif @page == 1 && @pokemon.isFusion? && respond_to?(:pbShowFusionSummaryDetail)
+			  pbShowFusionSummaryDetail
+			  dorefresh = true
+			else
+			  pbSEStop
+			  @pokemon.play_cry
+			end
 		  elsif Input.trigger?(Input::BACK)
 			pbPlayCloseMenuSE
 			break
