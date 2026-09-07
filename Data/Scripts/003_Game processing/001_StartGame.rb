@@ -102,8 +102,9 @@ module Game
     else
       SaveData.load_bootup_values(save_data)
     end
-    # Set resize factor
-    pbSetResizeFactor([$PokemonSystem.screensize, 4].min)
+    # Set resize factor (avvio automatico su 'M' / 1x)
+    $PokemonSystem.screensize = 1 if $PokemonSystem
+    pbSetResizeFactor(1)
     # Set language (and choose language if there is no save file)
     if Settings::LANGUAGES[Settings::GAME_ID].length >= 2
       $PokemonSystem.language = pbChooseLanguage if save_data.empty?
@@ -196,6 +197,8 @@ module Game
   def self.load(save_data)
     validate save_data => Hash
     SaveData.load_all_values(save_data)
+    $PokemonSystem.screensize = 1 if $PokemonSystem
+    pbSetResizeFactor(1)
     self.load_map
     pbAutoplayOnSave
     $game_map.update
