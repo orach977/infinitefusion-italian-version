@@ -132,6 +132,97 @@
             ]
         },
         {
+            "name": "[PIF] 5. Remaster Ultra-HD Smooth (xBRZ 4x + CAS + Vibrance)",
+            "effects": [
+                {
+                    "name": "xBRZ\\xBRZ_4x",
+                    "scalingType": 0,
+                    "scale": {
+                        "x": 4.0,
+                        "y": 4.0
+                    }
+                },
+                {
+                    "name": "Pixel Art\\SharpBilinear",
+                    "scalingType": 1,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                {
+                    "name": "CAS\\CAS",
+                    "parameters": {
+                        "sharpness": 0.2
+                    }
+                },
+                {
+                    "name": "ImageAdjustment",
+                    "parameters": {
+                        "saturation": 1.15,
+                        "contrast": 1.06,
+                        "brightBoost": 0.01
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[PIF] 6. Remaster Ultra-HD Freescale (xBRZ Freescale + Vibrance)",
+            "effects": [
+                {
+                    "name": "xBRZ\\xBRZ_Freescale",
+                    "scalingType": 1,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                {
+                    "name": "CAS\\CAS",
+                    "parameters": {
+                        "sharpness": 0.2
+                    }
+                },
+                {
+                    "name": "ImageAdjustment",
+                    "parameters": {
+                        "saturation": 1.15,
+                        "contrast": 1.06,
+                        "brightBoost": 0.01
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[PIF] 7. Remaster Anime HD (Anime4K + Vibrance)",
+            "effects": [
+                {
+                    "name": "Anime4K\\Anime4K_Upscale_Denoise_L",
+                    "scalingType": 0,
+                    "scale": {
+                        "x": 2.0,
+                        "y": 2.0
+                    }
+                },
+                {
+                    "name": "Pixel Art\\SharpBilinear",
+                    "scalingType": 1,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                {
+                    "name": "ImageAdjustment",
+                    "parameters": {
+                        "saturation": 1.15,
+                        "contrast": 1.06,
+                        "brightBoost": 0.01
+                    }
+                }
+            ]
+        },
+        {
             "name": "Lanczos",
             "effects": [
                 {
@@ -166,7 +257,7 @@
     ],
     "profiles": [
         {
-            "scalingMode": 2,
+            "scalingMode": 4,
             "captureMethod": 0,
             "multiMonitorUsage": 0,
             "initialWindowedScaleFactor": 0,
@@ -203,7 +294,7 @@
             "launcherPath": "",
             "autoScale": 1,
             "launchParameters": "",
-            "scalingMode": 2,
+            "scalingMode": 4,
             "captureMethod": 0,
             "multiMonitorUsage": 0,
             "initialWindowedScaleFactor": 0,
@@ -240,7 +331,7 @@
             "launcherPath": "",
             "autoScale": 1,
             "launchParameters": "",
-            "scalingMode": 2,
+            "scalingMode": 4,
             "captureMethod": 0,
             "multiMonitorUsage": 0,
             "initialWindowedScaleFactor": 0,
