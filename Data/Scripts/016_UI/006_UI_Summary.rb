@@ -439,13 +439,14 @@ class PokemonSummary_Scene
       headName = getPokemon(@pokemon.species_data.get_head_species).name
       bodyName = getPokemon(@pokemon.species_data.get_body_species).name
 
-      textpos << [_INTL("Head"), 238, fusion_head_y, 0, base, shadow]
+      textpos << [_INTL("Testa"), 238, fusion_head_y, 0, base, shadow]
       textpos << [headName, 435, fusion_head_y, 2, @text_color_base, @text_color_shadow]
 
-      textpos << [_INTL("Body"), 238, fusion_body_y, 0, base, shadow]
+      textpos << [_INTL("Corpo"), 238, fusion_body_y, 0, base, shadow]
       textpos << [bodyName, 435, fusion_body_y, 2, @text_color_base, @text_color_shadow]
 
-      textpos << [_INTL("[Z: Anteprima Fusione]"), 435, fusion_body_y + 24, 2, Color.new(100, 220, 255), Color.new(20, 50, 90)]
+      # Posizionato in alto a destra (y=44), identico alla schermata IV/EV della Pagina 3, senza alcun overlap!
+      textpos << [_INTL("[Z: Info Fusione]"), 420, 44, 2, Color.new(120, 210, 255), Color.new(30, 60, 90)]
     else
       dexnum = GameData::Species.get(@pokemon.species).id_number
       textpos << [_INTL("Dex No"), 238, fusion_head_y, 0, base, shadow]
@@ -1480,7 +1481,7 @@ class PokemonSummary_Scene
     viewport.z = 999999
     overlay_sprite = BitmapSprite.new(Graphics.width, Graphics.height, viewport)
     overlay = overlay_sprite.bitmap
-    pbSetNarrowFont(overlay)
+    pbSetSystemFont(overlay)
 
     # Sfondo scuro semitrasparente e cornice elegante
     overlay.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(10, 14, 24, 235))
@@ -1493,37 +1494,39 @@ class PokemonSummary_Scene
     base_col   = Color.new(245, 245, 245)
     shadow_col = Color.new(40, 40, 50)
     textpos = [
-      [_INTL("COMPOSIZIONE DELLA FUSIONE"), Graphics.width / 2, 20, 2, Color.new(255, 220, 80), Color.new(100, 70, 0)],
-      [@pokemon.name, Graphics.width / 2, 42, 2, base_col, shadow_col]
+      [_INTL("COMPOSIZIONE FUSIONE"), Graphics.width / 2, 16, 2, Color.new(255, 215, 60), Color.new(100, 70, 0)],
+      [@pokemon.name, Graphics.width / 2, 38, 2, base_col, shadow_col]
     ]
 
     # Riquadro Testa (Head) a sinistra
-    overlay.fill_rect(24, 68, 224, 130, Color.new(30, 40, 62))
-    textpos << [_INTL("TESTA (HEAD)"), 136, 74, 2, Color.new(120, 210, 255), shadow_col]
-    textpos << [head_sp.real_name, 136, 94, 2, base_col, shadow_col]
+    overlay.fill_rect(24, 62, 224, 140, Color.new(28, 38, 58))
+    textpos << [_INTL("TESTA (HEAD)"), 136, 68, 2, Color.new(120, 210, 255), shadow_col]
+    textpos << [head_sp.real_name, 136, 88, 2, base_col, shadow_col]
     head_type_str = GameData::Type.get(head_sp.type1).name
     head_type_str += " / " + GameData::Type.get(head_sp.type2).name if head_sp.type1 != head_sp.type2
-    textpos << [_INTL("Tipo: {1}", head_type_str), 136, 116, 2, Color.new(200, 200, 210), shadow_col]
+    textpos << [_INTL("Tipo: {1}", head_type_str), 136, 108, 2, Color.new(200, 205, 215), shadow_col]
     head_bst = head_sp.base_stats.values.sum rescue 0
-    textpos << [sprintf("BST: %d  |  No. %03d", head_bst, head_sp.id_number), 136, 138, 2, Color.new(180, 230, 160), shadow_col]
-    textpos << [_INTL("Contribuisce a Sp.Atk, Sp.Def, Spd"), 136, 162, 2, Color.new(180, 185, 195), shadow_col]
+    textpos << [sprintf("BST: %d  |  No. %03d", head_bst, head_sp.id_number), 136, 128, 2, Color.new(180, 235, 160), shadow_col]
+    textpos << [_INTL("Statistiche trasmesse:"), 136, 150, 2, Color.new(160, 175, 195), shadow_col]
+    textpos << [_INTL("Atk.Sp • Dif.Sp • Vel"), 136, 172, 2, Color.new(255, 225, 110), Color.new(40, 30, 10)]
 
     # Riquadro Corpo (Body) a destra
-    overlay.fill_rect(264, 68, 224, 130, Color.new(30, 40, 62))
-    textpos << [_INTL("CORPO (BODY)"), 376, 74, 2, Color.new(255, 160, 120), shadow_col]
-    textpos << [body_sp.real_name, 376, 94, 2, base_col, shadow_col]
+    overlay.fill_rect(264, 62, 224, 140, Color.new(28, 38, 58))
+    textpos << [_INTL("CORPO (BODY)"), 376, 68, 2, Color.new(255, 160, 120), shadow_col]
+    textpos << [body_sp.real_name, 376, 88, 2, base_col, shadow_col]
     body_type_str = GameData::Type.get(body_sp.type1).name
     body_type_str += " / " + GameData::Type.get(body_sp.type2).name if body_sp.type1 != body_sp.type2
-    textpos << [_INTL("Tipo: {1}", body_type_str), 376, 116, 2, Color.new(200, 200, 210), shadow_col]
+    textpos << [_INTL("Tipo: {1}", body_type_str), 376, 108, 2, Color.new(200, 205, 215), shadow_col]
     body_bst = body_sp.base_stats.values.sum rescue 0
-    textpos << [sprintf("BST: %d  |  No. %03d", body_bst, body_sp.id_number), 376, 138, 2, Color.new(180, 230, 160), shadow_col]
-    textpos << [_INTL("Contribuisce a HP, Atk, Def"), 376, 162, 2, Color.new(180, 185, 195), shadow_col]
+    textpos << [sprintf("BST: %d  |  No. %03d", body_bst, body_sp.id_number), 376, 128, 2, Color.new(180, 235, 160), shadow_col]
+    textpos << [_INTL("Statistiche trasmesse:"), 376, 150, 2, Color.new(160, 175, 195), shadow_col]
+    textpos << [_INTL("PS • Attacco • Difesa"), 376, 172, 2, Color.new(255, 225, 110), Color.new(40, 30, 10)]
 
     # Riquadro Fusione Inversa (Reverse) in basso
     reversed_id = (body_sp.id_number * NB_POKEMON) + head_sp.id_number
     reversed_sp = GameData::Species.get(reversed_id) rescue nil
-    overlay.fill_rect(24, 212, 464, 114, Color.new(25, 34, 52))
-    textpos << [_INTL("FUSIONE ALTERNATIVA (CORPO + TESTA SCAMBIATI)"), Graphics.width / 2, 218, 2, Color.new(255, 215, 60), shadow_col]
+    overlay.fill_rect(24, 210, 464, 114, Color.new(25, 34, 52))
+    textpos << [_INTL("FUSIONE INVERSA (TESTA + CORPO SCAMBIATI)"), Graphics.width / 2, 216, 2, Color.new(255, 215, 60), shadow_col]
     if reversed_sp
       rev_name = reversed_sp.real_name
       rev_type_str = GameData::Type.get(reversed_sp.type1).name
@@ -1531,15 +1534,16 @@ class PokemonSummary_Scene
       rev_bst = reversed_sp.base_stats.values.sum rescue 0
       rev_has_custom = customSpriteExists(head_sp.id_number, body_sp.id_number) rescue false
 
-      textpos << [sprintf("%s  -  Tipo: %s  -  BST: %d", rev_name, rev_type_str, rev_bst), Graphics.width / 2, 244, 2, base_col, shadow_col]
-      badge_str = rev_has_custom ? _INTL("★ Ha uno Sprite Custom dedicato!") : _INTL("Sprite Autogenerato")
-      badge_col = rev_has_custom ? Color.new(255, 215, 0) : Color.new(180, 180, 190)
-      textpos << [badge_str, Graphics.width / 2, 268, 2, badge_col, shadow_col]
-      textpos << [_INTL("Testa: {1} | Corpo: {2}", body_sp.real_name, head_sp.real_name), Graphics.width / 2, 292, 2, Color.new(190, 200, 220), shadow_col]
+      textpos << [sprintf("%s   •   Tipo: %s   •   BST: %d", rev_name, rev_type_str, rev_bst), Graphics.width / 2, 240, 2, base_col, shadow_col]
+      badge_str = rev_has_custom ? _INTL("[Custom Sprite dedicato]") : _INTL("[Sprite Autogenerato]")
+      badge_col = rev_has_custom ? Color.new(255, 215, 0) : Color.new(180, 185, 195)
+      textpos << [badge_str, Graphics.width / 2, 264, 2, badge_col, shadow_col]
+      textpos << [_INTL("Testa: {1}   •   Corpo: {2}", body_sp.real_name, head_sp.real_name), Graphics.width / 2, 288, 2, Color.new(190, 200, 220), shadow_col]
     end
 
-    # Barra di chiusura in fondo
-    textpos << [_INTL("[Z / C / X]: Chiudi anteprima"), Graphics.width / 2, 344, 2, Color.new(120, 220, 255), shadow_col]
+    # Barra di chiusura in fondo (all'interno della finestra senza toccare il bordo)
+    overlay.fill_rect(24, 332, 464, 26, Color.new(16, 22, 34))
+    textpos << [_INTL("[Z / C / X]: Chiudi anteprima"), Graphics.width / 2, 334, 2, Color.new(120, 220, 255), shadow_col]
 
     pbDrawTextPositions(overlay, textpos)
 

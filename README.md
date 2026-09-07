@@ -91,10 +91,12 @@ Tutti gli strumenti, rimedi, bacche e relative descrizioni degli effetti sono co
 </p>
 
 ### 🧬 Anteprima Fusione DNA Dettagliata
-Durante la fusione (o consultando il menù di anteprima con *Super giunzioni*), premi **Z** o **Shift** per aprire la scheda dettagli approfondita con statistiche base, BST calcolato, abilità trasmissibili, tipi e componenti:
+Durante la fusione (o consultando l'anteprima con *Super giunzioni*), confronta visivamente i due possibili esiti di fusione con tipi, statistiche totali (BST) e badge degli sprite. Premendo **Z** o **Shift**, apri istantaneamente la **Scheda Dettagli** approfondita con ruoli testa/corpo, statistiche base e abilità trasmissibili:
 
 <p align="center">
-  <img src="docs/screenshots/anteprima_fusione_dettagli.png" alt="Scheda Dettagli Fusione con Chardos" width="85%">
+  <img src="docs/screenshots/anteprima_fusione_scelta.png" alt="Schermata di selezione e confronto fusione" width="48%">
+  &nbsp;
+  <img src="docs/screenshots/anteprima_fusione_dettagli.png" alt="Scheda Dettagli Fusione con Chardos" width="48%">
 </p>
 
 ### 📊 Visualizzatore IV, EV e Natura
