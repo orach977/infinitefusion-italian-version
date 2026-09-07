@@ -677,8 +677,11 @@ class PokemonHabitatRadar_Scene
     overlay = @sprites["overlay"].bitmap
     overlay.clear
 
-    # FONT COMPATTO E NITIDO: size 20
-    overlay.font.size = 20
+    # Il radar lavora sulla risoluzione logica di 512x384. Con il font Power
+    # Green a 20px le etichette delle tab e le righe ravvicinate dei pannelli
+    # si sovrappongono quando la schermata viene ingrandita. 16px mantiene il
+    # look pixel-art, ma lascia margini reali fra testo, bordi e righe.
+    overlay.font.size = 16
 
     textpos = []
 
@@ -702,9 +705,9 @@ class PokemonHabitatRadar_Scene
     textpos << ["< #{display_name} >  #{map_num}", 10, 6, 0, c_white, c_shadow]
 
     # Orario in-game & Fascia (centrato esattamente a x=256)
-    draw_panel(panel, 196, 4, 120, 22, Color.new(24, 34, 18), Color.new(200, 180, 40))
+    draw_panel(panel, 186, 4, 140, 22, Color.new(24, 34, 18), Color.new(200, 180, 40))
     time_str = HabitatRadarData.current_time_display
-    textpos << [time_str, 256, 5, 2, c_gold, c_shadow]
+    textpos << [time_str, 256, 6, 2, c_gold, c_shadow]
 
     # Rapporto Pokédex (allineato a destra)
     total_sp = @pokemon_list.length
@@ -716,7 +719,7 @@ class PokemonHabitatRadar_Scene
     end
 
     # =====================================================================
-    # 2. TAB FILTRI ORARI (y=34..52) - 5 Tab simmetriche da 96px (8..504)
+    # 2. TAB FILTRI ORARI (y=32..54) - 5 Tab simmetriche da 96px (8..504)
     # =====================================================================
     tab_defs = [
       ["TUTTI",       8,  96],
@@ -730,11 +733,11 @@ class PokemonHabitatRadar_Scene
       t_name, tx, tw = t_info
       is_cur_tab = (i == @filter_mode)
       if is_cur_tab
-        draw_panel(panel, tx, 34, tw, 18, Color.new(0, 130, 205), Color.new(0, 225, 255))
-        textpos << [t_name, tx + (tw / 2), 35, 2, c_white, c_shadow]
+        draw_panel(panel, tx, 32, tw, 22, Color.new(0, 130, 205), Color.new(0, 225, 255))
+        textpos << [t_name, tx + (tw / 2), 29, 2, c_white, c_shadow]
       else
-        draw_panel(panel, tx, 34, tw, 18, Color.new(16, 22, 34), Color.new(35, 48, 70))
-        textpos << [t_name, tx + (tw / 2), 35, 2, c_silver, c_shadow]
+        draw_panel(panel, tx, 32, tw, 22, Color.new(16, 22, 34), Color.new(35, 48, 70))
+        textpos << [t_name, tx + (tw / 2), 29, 2, c_silver, c_shadow]
       end
     end
 
@@ -747,7 +750,7 @@ class PokemonHabitatRadar_Scene
 
     f_count = @filtered_list.length
     draw_panel(panel, 8, 56, 270, 24, Color.new(18, 24, 38), Color.new(35, 50, 75))
-    textpos << ["RADAR SELVATICI (#{f_count})", 14, 59, 0, c_cyan, c_shadow]
+    textpos << ["RADAR SELVATICI (#{f_count})", 14, 55, 0, c_cyan, c_shadow]
 
     if @filtered_list.empty?
       textpos << ["Nessun selvatico", 143, 140, 2, c_silver, c_shadow]
@@ -755,7 +758,7 @@ class PokemonHabitatRadar_Scene
       textpos << ["Premi [Z] per cambiare filtro", 143, 190, 2, c_cyan, c_shadow]
     else
       if @top_index > 0
-        textpos << ["^", 268, 59, 1, c_cyan, c_shadow]
+        textpos << ["^", 268, 55, 1, c_cyan, c_shadow]
       end
 
       CARDS_PER_PAGE.times do |slot_i|
@@ -825,7 +828,7 @@ class PokemonHabitatRadar_Scene
       # Indicatore v Altro (centrato a x=143)
       if @top_index + CARDS_PER_PAGE < @filtered_list.length
         rem = f_count - @top_index - CARDS_PER_PAGE
-        textpos << ["v Altri #{rem} Pokemon", 143, 331, 2, c_cyan, c_shadow]
+        textpos << ["v Altri #{rem} Pokemon", 143, 326, 2, c_cyan, c_shadow]
       end
     end
 
@@ -844,8 +847,8 @@ class PokemonHabitatRadar_Scene
       draw_panel(panel, 284, 56, 220, 26, Color.new(20, 28, 44), Color.new(40, 60, 90))
       dex_num = sprintf("#%03d", (sp_data.id_number rescue 0))
       name_str = is_seen ? cur[:name] : "?????????"
-      textpos << ["#{dex_num} #{name_str}", 290, 60, 0, c_white, c_shadow]
-      textpos << [cur[:rarity_tag], 498, 60, 1, cur[:rarity_color], c_shadow]
+      textpos << ["#{dex_num} #{name_str}", 290, 57, 0, c_white, c_shadow]
+      textpos << [cur[:rarity_tag], 498, 57, 1, cur[:rarity_color], c_shadow]
 
       # Battler sprite (centrato nella colonna sinistra: x=326, y=112, max_dim=50)
       if @current_battler_species != cur[:species]
@@ -887,15 +890,13 @@ class PokemonHabitatRadar_Scene
         textpos << ["Tipo: ???", 326, 154, 2, c_silver, c_shadow]
       end
 
-      # Sub-colonna destra: Box Disponibilità (y = 86..106, w = 130)
+      # Sub-colonna destra: Box Disponibilità (y = 86..108, w = 136)
       if cur[:active_now]
-        draw_panel(panel, 368, 86, 130, 20, Color.new(18, 52, 32), Color.new(60, 220, 100))
-        panel.fill_rect(374, 93, 6, 6, c_green)
-        textpos << ["DISPONIBILE ORA", 436, 87, 2, c_green, c_shadow]
+        draw_panel(panel, 362, 86, 136, 22, Color.new(18, 52, 32), Color.new(60, 220, 100))
+        textpos << ["DISPONIBILE ORA", 430, 82, 2, c_green, c_shadow]
       else
-        draw_panel(panel, 368, 86, 130, 20, Color.new(42, 28, 32), Color.new(180, 70, 70))
-        panel.fill_rect(374, 93, 6, 6, Color.new(220, 80, 80))
-        textpos << [cur[:time_tag].upcase, 436, 87, 2, Color.new(240, 160, 160), c_shadow]
+        draw_panel(panel, 362, 86, 136, 22, Color.new(42, 28, 32), Color.new(180, 70, 70))
+        textpos << [cur[:time_tag].upcase, 430, 82, 2, Color.new(240, 160, 160), c_shadow]
       end
 
       # Righe Dettaglio Incontro isolate verticalmente (y = 112, 132, 152, 170)
@@ -936,16 +937,16 @@ class PokemonHabitatRadar_Scene
           col = idx / 3
           row = idx % 3
           bx = (col == 0) ? 290 : 395
-          by = 222 + (row * 17)
+          by = 224 + (row * 19)
           val = cur[st[0]] || 0
 
           textpos << [st[1], bx, by, 0, Color.new(160, 175, 195), c_shadow]
-          textpos << ["#{val}", bx + 24, by, 0, Color.new(245, 248, 255), c_shadow]
+          textpos << ["#{val}", bx + 26, by, 0, Color.new(245, 248, 255), c_shadow]
 
-          bar_max = 38
+          bar_max = 34
           bar_fill = (val * bar_max / 140.0).round.clamp(2, bar_max)
-          panel.fill_rect(bx + 48, by + 4, bar_max, 6, Color.new(28, 36, 50))
-          overlay.fill_rect(bx + 48, by + 4, bar_fill, 6, st[2])
+          panel.fill_rect(bx + 54, by + 5, bar_max, 6, Color.new(28, 36, 50))
+          overlay.fill_rect(bx + 54, by + 5, bar_fill, 6, st[2])
         end
       else
         textpos << ["STATISTICHE BASE", 290, 202, 0, c_cyan, c_shadow]
@@ -954,29 +955,29 @@ class PokemonHabitatRadar_Scene
       end
 
       # Linea di separazione info GPS
-      panel.fill_rect(288, 276, 212, 1, Color.new(35, 48, 70))
+      panel.fill_rect(288, 286, 212, 1, Color.new(35, 48, 70))
 
       # Altre mappe
       other = HabitatRadarData.count_other_maps_for_species(cur[:id], @map_id)
       if other == 0
-        textpos << ["Esclusivo di quest'area!", 290, 282, 0, c_gold, c_shadow]
+        textpos << ["Esclusivo di quest'area!", 290, 290, 0, c_gold, c_shadow]
       else
-        textpos << ["Presente in altre #{other} mappe", 290, 282, 0, c_cyan, c_shadow]
+        textpos << ["Presente in altre #{other} mappe", 290, 290, 0, c_cyan, c_shadow]
       end
 
       # Prompt GPS
       is_target = ($PokemonGlobal && $PokemonGlobal.radar_tracked_species == cur[:id])
       gps_text = is_target ? "C: Rimuovi Target GPS" : "C: Imposta come Target GPS"
       gps_col = is_target ? c_red : c_green
-      textpos << [gps_text, 290, 302, 0, gps_col, c_shadow]
+      textpos << [gps_text, 290, 310, 0, gps_col, c_shadow]
 
       # Stato GPS globale
       if $PokemonGlobal && $PokemonGlobal.radar_tracked_species
         t_name = "?"
         begin; t_name = GameData::Species.get($PokemonGlobal.radar_tracked_species).name; rescue; end
-        textpos << ["GPS: #{t_name}", 290, 322, 0, c_gold, c_shadow]
+        textpos << ["GPS: #{t_name}", 290, 324, 0, c_gold, c_shadow]
       else
-        textpos << ["GPS: Nessun bersaglio", 290, 322, 0, Color.new(140, 155, 175), c_shadow]
+        textpos << ["GPS: Nessun bersaglio", 290, 324, 0, Color.new(140, 155, 175), c_shadow]
       end
 
     else
@@ -993,11 +994,11 @@ class PokemonHabitatRadar_Scene
     draw_panel(panel, 0, 354, 512, 30, Color.new(12, 16, 26), Color.new(35, 50, 75))
     panel.fill_rect(0, 354, 512, 1, Color.new(0, 210, 255))
 
-    textpos << ["< > Mappe",   56, 360, 2, c_white,  c_shadow]
-    textpos << ["^ v Lista",  154, 360, 2, c_white,  c_shadow]
-    textpos << ["[Z] Filtri", 256, 360, 2, c_cyan,   c_shadow]
-    textpos << ["[C] GPS",    358, 360, 2, c_green,  c_shadow]
-    textpos << ["[X] Esci",   456, 360, 2, c_silver, c_shadow]
+    textpos << ["< > Mappe",   56, 358, 2, c_white,  c_shadow]
+    textpos << ["^ v Lista",  154, 358, 2, c_white,  c_shadow]
+    textpos << ["[Z] Filtri", 256, 358, 2, c_cyan,   c_shadow]
+    textpos << ["[C] GPS",    358, 358, 2, c_green,  c_shadow]
+    textpos << ["[X] Esci",   456, 358, 2, c_silver, c_shadow]
 
     pbDrawTextPositions(overlay, textpos)
   end
