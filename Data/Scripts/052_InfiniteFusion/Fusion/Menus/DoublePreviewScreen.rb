@@ -263,9 +263,56 @@ class DoublePreviewScreen
 
   def drawFusionInformation(fusedDexNum, level, x = 0)
     viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
-    @typewindows << drawPokemonType(fusedDexNum, viewport, x + 55, 220) if @draw_types
-    drawFusionPreviewText(viewport, "Lv. " + level.to_s, x + 80, 40,) if @draw_level
-    drawSpriteInfoIcons(getPokemon(fusedDexNum),viewport) if @draw_sprite_info
+    viewport.z = 100002
+    @typewindows << viewport
+    @typewindows << drawPokemonType(fusedDexNum, viewport, x + 55, 216) if @draw_types
+
+    body_id = getBodyID(fusedDexNum)
+    head_id = getHeadID(fusedDexNum, body_id)
+    head_sp = GameData::Species.get(head_id)
+    body_sp = GameData::Species.get(body_id)
+    fused_sp = GameData::Species.get(fusedDexNum)
+
+    hasCustom = customSpriteExists(body_id, head_id)
+    bst = (fused_sp && fused_sp.base_stats) ? fused_sp.base_stats.values.sum : 0
+
+    overlay = BitmapSprite.new(Graphics.width, Graphics.height, viewport).bitmap
+    pbSetNarrowFont(overlay)
+
+    label_base = Color.new(248, 248, 248)
+    label_shadow = Color.new(60, 60, 60)
+    textpos = []
+
+    # Nome fusione e badge Custom Sprite in cima
+    name_text = fused_sp ? fused_sp.real_name : _INTL("Fusione")
+    textpos << [name_text, x + 24, 12, 0, Color.new(255, 255, 255), label_shadow]
+
+    if hasCustom
+      textpos << [_INTL("★ Custom"), x + 150, 12, 0, Color.new(255, 215, 40), Color.new(120, 80, 0)]
+    else
+      textpos << [_INTL("Autogen"), x + 150, 12, 0, Color.new(180, 185, 190), Color.new(50, 50, 60)]
+    end
+
+    # Livello
+    textpos << [sprintf("Lv. %d", level), x + 80, 40, 0, label_base, label_shadow] if @draw_level
+
+    # Dettaglio Testa/Corpo e BST sopra i tipi
+    bst_color = (bst >= 500) ? Color.new(100, 245, 120) : Color.new(255, 220, 80)
+    textpos << [sprintf("BST: %d", bst), x + 24, 196, 0, bst_color, label_shadow]
+    if head_sp && body_sp
+      textpos << [sprintf("T:%s C:%s", head_sp.real_name[0..5], body_sp.real_name[0..5]), x + 120, 196, 0, Color.new(200, 220, 255), Color.new(40, 60, 100)]
+    end
+
+    # Abilità sotto i tipi
+    if fused_sp && fused_sp.abilities
+      abil_names = fused_sp.abilities.map { |a| GameData::Ability.get(a).name rescue nil }.compact.uniq
+      if abil_names.length > 0
+        textpos << [sprintf("Abil: %s", abil_names.first(2).join("/")), x + 24, 248, 0, Color.new(220, 220, 220), label_shadow]
+      end
+    end
+
+    pbDrawTextPositions(overlay, textpos)
+    drawSpriteInfoIcons(getPokemon(fusedDexNum), viewport) if @draw_sprite_info
   end
 
 

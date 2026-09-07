@@ -353,6 +353,66 @@ class FightMenuDisplay < BattleMenuBase
     refreshShiftButton if @shiftMode!=oldValue
   end
 
+  def getEffectivenessData(move)
+    return nil if !move || !@battler || !@battler.battle
+    opp = @battler.pbDirectOpposing(true)
+    return nil if !opp
+    if move.statusMove?
+      return {
+        :badge => _INTL("[Stato]"),
+        :full => _INTL("Mossa di Stato"),
+        :base => Color.new(140, 200, 255),
+        :shadow => Color.new(40, 60, 100)
+      }
+    end
+    mod = move.pbCalcTypeMod(move.type, @battler, opp)
+    if Effectiveness.ineffective?(mod)
+      return {
+        :badge => _INTL("[Immune]"),
+        :full => _INTL("Immune (x0)"),
+        :base => Color.new(180, 180, 180),
+        :shadow => Color.new(60, 60, 60)
+      }
+    elsif Effectiveness.extremely_effective?(mod)
+      return {
+        :badge => _INTL("[Super x4]"),
+        :full => _INTL("Superefficace! (x4)"),
+        :base => Color.new(255, 220, 40),
+        :shadow => Color.new(140, 100, 0)
+      }
+    elsif Effectiveness.super_effective?(mod)
+      return {
+        :badge => _INTL("[Super]"),
+        :full => _INTL("Superefficace (x2)"),
+        :base => Color.new(80, 240, 90),
+        :shadow => Color.new(10, 80, 20)
+      }
+    elsif Effectiveness.mostly_ineffective?(mod)
+      return {
+        :badge => _INTL("[Poco x¼]"),
+        :full => _INTL("Poco efficace (x0.25)"),
+        :base => Color.new(255, 90, 90),
+        :shadow => Color.new(120, 20, 20)
+      }
+    elsif Effectiveness.not_very_effective?(mod)
+      return {
+        :badge => _INTL("[Poco eff.]"),
+        :full => _INTL("Non molto eff. (x0.5)"),
+        :base => Color.new(255, 150, 50),
+        :shadow => Color.new(130, 60, 10)
+      }
+    else
+      return {
+        :badge => _INTL("[Efficace]"),
+        :full => _INTL("Efficace (x1)"),
+        :base => Color.new(230, 230, 230),
+        :shadow => Color.new(80, 80, 80)
+      }
+    end
+  rescue
+    return nil
+  end
+
   def refreshButtonNames
     moves = (@battler) ? @battler.moves : []
     if !USE_GRAPHICS
@@ -384,6 +444,16 @@ class FightMenuDisplay < BattleMenuBase
         textPos.push([moves[i].name,x,y,2,TEXT_SHADOW_COLOR,moveNameBase])
       else
         textPos.push([moves[i].name,x,y,2,moveNameBase,TEXT_SHADOW_COLOR])
+      end
+      # Indicatore efficacia mossa sul pulsante
+      eff = getEffectivenessData(moves[i])
+      if eff && eff[:badge]
+        badgeBase = eff[:base]
+        badgeShadow = eff[:shadow]
+        if isDarkMode
+          badgeBase, badgeShadow = badgeShadow, badgeBase
+        end
+        textPos.push([eff[:badge], x, y + 20, 2, badgeBase, badgeShadow])
       end
     end
     pbDrawTextPositions(@pokemon_name_overlay.bitmap, textPos)
@@ -428,10 +498,10 @@ class FightMenuDisplay < BattleMenuBase
     # Type icon
     type_number = GameData::Type.get(move.type).id_number
     @typeIcon.src_rect.y = type_number * TYPE_ICON_HEIGHT
-    # PP text
+    # PP text and Effectiveness
+    textPos = []
     if move.total_pp>0
       ppFraction = [(4.0*move.pp/move.total_pp).ceil,3].min
-      textPos = []
 
       ppColorBase = PP_COLORS[ppFraction*2]
       ppColorShadow = PP_COLORS[ppFraction*2+1]
@@ -441,8 +511,18 @@ class FightMenuDisplay < BattleMenuBase
 
       textPos.push([_INTL("PP: {1}/{2}",move.pp,move.total_pp),
          448,44,2,ppColorBase,ppColorShadow])
-      pbDrawTextPositions(@infoOverlay.bitmap,textPos)
     end
+    # Dettaglio efficacia nell'overlay destro
+    eff = getEffectivenessData(move)
+    if eff && eff[:full]
+      effBase = eff[:base]
+      effShadow = eff[:shadow]
+      if isDarkMode
+        effBase, effShadow = effShadow, effBase
+      end
+      textPos.push([eff[:full], 448, 66, 2, effBase, effShadow])
+    end
+    pbDrawTextPositions(@infoOverlay.bitmap,textPos) if textPos.length > 0
   end
 
   def refreshMegaEvolutionButton
