@@ -1,5 +1,12 @@
 # 🇮🇹 Pokémon Infinite Fusion — Versione Italiana
 
+<p align="left">
+  <a href="https://github.com/orach977/infinitefusion-italian-version/releases"><img src="https://img.shields.io/badge/Release-v1.0.0-2ea44f?style=for-the-badge&logo=github" alt="Release v1.0.0"></a>
+  <img src="https://img.shields.io/badge/Lingua-Italiano%20100%25-007acc?style=for-the-badge" alt="Italiano 100%">
+  <img src="https://img.shields.io/badge/Compatibilità-Windows%2010%20%2F%2011-blue?style=for-the-badge" alt="Windows 10/11">
+  <img src="https://img.shields.io/badge/Stato-Completo%20e%20Stabile-brightgreen?style=for-the-badge" alt="Completo">
+</p>
+
 > Fork italiano di [Pokémon Infinite Fusion](https://github.com/infinitefusion/infinitefusion-e18) con localizzazione completa, strumenti esclusivi e upscaling grafico.
 
 <p align="center">
