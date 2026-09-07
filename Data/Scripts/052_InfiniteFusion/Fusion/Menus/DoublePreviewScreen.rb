@@ -1,13 +1,18 @@
+#===============================================================================
+# DoublePreviewScreen
+# Schermata di anteprima fusione DNA (due riquadri a confronto)
+# e Scheda Dettagli approfondita (apribile con Z / Shift).
+#===============================================================================
 class DoublePreviewScreen
   attr_reader :sprite_left
   attr_reader :sprite_right
 
   SELECT_ARROW_X_LEFT   = 100
   SELECT_ARROW_X_RIGHT  = 350
-  SELECT_ARROW_X_CANCEL = 236
+  SELECT_ARROW_X_CANCEL = 227
 
   SELECT_ARROW_Y_SELECT = 0
-  SELECT_ARROW_Y_CANCEL = 295
+  SELECT_ARROW_Y_CANCEL = 285
   ARROW_GRAPHICS_PATH   = "Graphics/Pictures/Fusion/selHand"
   CANCEL_BUTTON_PATH   = "Graphics/Pictures/Fusion/previewScreen_Cancel"
   BACKGROUND_PATH       = "Graphics/Pictures/shadeFull_"
@@ -19,7 +24,7 @@ class DoublePreviewScreen
   ICON_EVO_HAS_NO_CUSTOM = "Graphics/Pictures/Fusion/evoNoCustom"
   ICON_EVO_FULL_CUSTOM   = "Graphics/Pictures/Fusion/evoCustom_full"
   CANCEL_BUTTON_X        = 128
-  CANCEL_BUTTON_Y        = 315
+  CANCEL_BUTTON_Y        = 310
 
   def initialize(species_left, species_right)
     @species_left      = species_left
@@ -126,7 +131,7 @@ class DoublePreviewScreen
   end
 
   def hideAllEvoIcons
-    @sprites["evo"].visible = true if @sprites["evo"]
+    @sprites["evo"].visible = false if @sprites["evo"]
     @evo_icons_visible = false
     @sprites.each do |key, sprite|
       sprite.visible = false if key.start_with?("evo_icon_")
@@ -192,8 +197,7 @@ class DoublePreviewScreen
 
     drawFusionInformation(dexNumber, level, x)
 
-    # Nota: Rimosso il filtro di oscuramento/silhouette (pbSetColor)
-    # in modo che lo sprite dell'anteprima di fusione sia sempre chiaramente visibile!
+    # Sprite sempre chiaramente visibile (rimosso silhouette pbSetColor)
     return previewwindow
   end
 
@@ -265,8 +269,6 @@ class DoublePreviewScreen
 
     body_id = getBodyID(fusedDexNum)
     head_id = getHeadID(fusedDexNum, body_id)
-    head_sp = GameData::Species.get(head_id)
-    body_sp = GameData::Species.get(body_id)
     fused_sp = GameData::Species.get(fusedDexNum)
 
     hasCustom = customSpriteExists(body_id, head_id)
@@ -276,36 +278,52 @@ class DoublePreviewScreen
     pbSetNarrowFont(overlay)
 
     label_base = Color.new(248, 248, 248)
-    label_shadow = Color.new(40, 40, 50)
+    label_shadow = Color.new(30, 40, 50)
     center_x = x + 96
-    textpos = []
 
-    # 1. In cima (y = 4..24): Nome della fusione e badge Custom/Autogen
+    # 1. Nome fusione sopra il riquadro (y = 4, font size 22)
+    overlay.font.size = 22
     name_text = fused_sp ? fused_sp.real_name : _INTL("Fusione")
-    textpos << [name_text, center_x, 4, 2, Color.new(255, 255, 255), label_shadow]
+    pbDrawTextPositions(overlay, [
+      [name_text, center_x, 4, 2, Color.new(255, 255, 255), label_shadow]
+    ])
 
-    if hasCustom
-      textpos << [_INTL("★ Custom Sprite"), center_x, 20, 2, Color.new(255, 215, 40), Color.new(120, 80, 0)]
-    else
-      textpos << [_INTL("Autogenerato"), center_x, 20, 2, Color.new(180, 185, 195), Color.new(50, 50, 60)]
-    end
-
-    # 2. Sotto la preview (y = 256..296): Livello, BST, Abilità, Hint
+    # 2. Informazioni sotto i tipi (y = 258..296, font size 18/20)
+    overlay.font.size = 20
+    info_positions = []
     bst_color = (bst >= 500) ? Color.new(100, 245, 120) : Color.new(255, 220, 80)
-    textpos << [sprintf("Lv. %d", level), x + 24, 256, 0, label_base, label_shadow] if @draw_level
-    textpos << [sprintf("BST: %d", bst), x + 168, 256, 1, bst_color, label_shadow]
+    info_positions << [sprintf("Lv. %d", level), x + 24, 258, 0, label_base, label_shadow] if @draw_level
+    info_positions << [sprintf("BST: %d", bst), x + 168, 258, 1, bst_color, label_shadow]
+    pbDrawTextPositions(overlay, info_positions)
 
-    if fused_sp && fused_sp.abilities
-      abil_names = fused_sp.abilities.map { |a| GameData::Ability.get(a).name rescue nil }.compact.uniq
-      if abil_names.length > 0
-        textpos << [sprintf("Abil: %s", abil_names.first(2).join("/")), center_x, 274, 2, Color.new(210, 220, 230), label_shadow]
-      end
+    # 3. Badge Custom Sprite / Autogen e Hint Scheda Dettagli (font size 18)
+    overlay.font.size = 18
+    badge_positions = []
+    if hasCustom
+      badge_positions << [_INTL("[Custom Sprite]"), center_x, 276, 2, Color.new(255, 215, 40), Color.new(100, 70, 0)]
+    else
+      badge_positions << [_INTL("[Autogenerato]"), center_x, 276, 2, Color.new(180, 185, 195), Color.new(40, 45, 55)]
     end
+    badge_positions << [_INTL("[Z: Scheda Dettagli]"), center_x, 294, 2, Color.new(100, 220, 255), Color.new(20, 50, 90)]
+    pbDrawTextPositions(overlay, badge_positions)
 
-    textpos << [_INTL("[Z: Scheda Dettagli]"), center_x, 292, 2, Color.new(100, 220, 255), Color.new(20, 50, 90)]
-
-    pbDrawTextPositions(overlay, textpos)
     drawSpriteInfoIcons(getPokemon(fusedDexNum), viewport) if @draw_sprite_info
+  end
+
+  def hideMainScreen
+    @sprites.each_value { |s| s.visible = false if s && !s.disposed? }
+    @picture1.visible = false if @picture1 && !@picture1.disposed?
+    @picture2.visible = false if @picture2 && !@picture2.disposed?
+    @typewindows.each { |w| w.visible = false if w && !w.disposed? }
+  end
+
+  def showMainScreen
+    @sprites.each_value { |s| s.visible = true if s && !s.disposed? }
+    @sprites["evo"].visible = false if @sprites["evo"] && !@sprites["evo"].disposed?
+    hideAllEvoIcons
+    @picture1.visible = true if @picture1 && !@picture1.disposed?
+    @picture2.visible = true if @picture2 && !@picture2.disposed?
+    @typewindows.each { |w| w.visible = true if w && !w.disposed? }
   end
 
   def pbShowDetailedPage(selected_index)
@@ -313,9 +331,10 @@ class DoublePreviewScreen
     return :back if !dexNumber
 
     pbPlayDecisionSE rescue nil
+    hideMainScreen
 
     detail_viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
-    detail_viewport.z = 200000
+    detail_viewport.z = 9999999
 
     overlay_sprite = BitmapSprite.new(Graphics.width, Graphics.height, detail_viewport)
     overlay = overlay_sprite.bitmap
@@ -326,35 +345,45 @@ class DoublePreviewScreen
     head_sp = GameData::Species.get(head_id)
     body_sp = GameData::Species.get(body_id)
     fused_sp = GameData::Species.get(dexNumber)
-    return :back if !fused_sp || !head_sp || !body_sp
 
     hasCustom = customSpriteExists(body_id, head_id)
-    bst = fused_sp.base_stats ? fused_sp.base_stats.values.sum : 0
+    bst = (fused_sp && fused_sp.base_stats) ? fused_sp.base_stats.values.sum : 0
 
-    # Sfondo principale scuro con bordo illuminato
-    overlay.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(12, 16, 26, 245))
-    overlay.fill_rect(8, 8, Graphics.width - 16, Graphics.height - 16, Color.new(22, 28, 44, 250))
-    overlay.fill_rect(8, 8, Graphics.width - 16, 2, Color.new(70, 130, 230))
-    overlay.fill_rect(8, Graphics.height - 10, Graphics.width - 16, 2, Color.new(70, 130, 230))
-    overlay.fill_rect(8, 8, 2, Graphics.height - 16, Color.new(70, 130, 230))
-    overlay.fill_rect(Graphics.width - 10, 8, 2, Graphics.height - 16, Color.new(70, 130, 230))
+    # Sfondo scuro e bordi
+    overlay.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(16, 20, 32, 255))
+    overlay.fill_rect(4, 4, Graphics.width - 8, Graphics.height - 8, Color.new(20, 26, 40, 255))
+    overlay.fill_rect(4, 4, Graphics.width - 8, 2, Color.new(70, 130, 230))
+    overlay.fill_rect(4, Graphics.height - 6, Graphics.width - 8, 2, Color.new(70, 130, 230))
+    overlay.fill_rect(4, 4, 2, Graphics.height - 8, Color.new(70, 130, 230))
+    overlay.fill_rect(Graphics.width - 6, 4, 2, Graphics.height - 8, Color.new(70, 130, 230))
 
-    label_base = Color.new(245, 245, 245)
-    label_shadow = Color.new(35, 40, 50)
-    textpos = [
-      [_INTL("SCHEDA COMPLETA DELLA FUSIONE"), Graphics.width / 2, 14, 2, Color.new(255, 215, 60), Color.new(100, 70, 0)],
-      [fused_sp.real_name, 120, 36, 2, Color.new(255, 255, 255), label_shadow]
-    ]
+    # Barra del titolo in alto
+    overlay.fill_rect(8, 8, Graphics.width - 16, 26, Color.new(26, 36, 56))
+    overlay.font.size = 20
+    pbDrawTextPositions(overlay, [
+      [_INTL("SCHEDA DETTAGLI FUSIONE"), Graphics.width / 2, 10, 2, Color.new(255, 215, 60), Color.new(100, 70, 0)]
+    ])
+
+    # PANNELLO SINISTRO (x=12, y=38, w=210, h=292)
+    overlay.fill_rect(12, 38, 210, 292, Color.new(22, 28, 44))
+    drawBoxBorder(overlay, 12, 38, 210, 292, Color.new(50, 70, 100))
+
+    # Nome Pokémon nel pannello sinistro
+    overlay.font.size = 22
+    pbDrawTextPositions(overlay, [
+      [fused_sp.real_name, 117, 44, 2, Color.new(255, 255, 255), Color.new(25, 30, 40)]
+    ])
 
     # Sprite della fusione nel riquadro sinistro
+    overlay.fill_rect(37, 68, 160, 124, Color.new(12, 16, 26))
+    drawBoxBorder(overlay, 37, 68, 160, 124, Color.new(60, 80, 110))
     sprite_bitmap = GameData::Species.front_sprite_bitmap(dexNumber)
     if sprite_bitmap
       sprite_bitmap.scale_bitmap(Settings::FRONTSPRITE_SCALE) rescue nil
       sw = sprite_bitmap.width
       sh = sprite_bitmap.height
-      sx = 120 - (sw / 2)
-      sy = 54 + (140 - sh) / 2
-      overlay.fill_rect(24, 54, 192, 140, Color.new(15, 20, 32))
+      sx = 117 - (sw / 2)
+      sy = 68 + (124 - sh) / 2
       overlay.blt(sx, sy, sprite_bitmap.bitmap, Rect.new(0, 0, sw, sh))
     end
 
@@ -365,92 +394,114 @@ class DoublePreviewScreen
     t1_rect = Rect.new(0, t1_num * 28, 64, 28)
     t2_rect = Rect.new(0, t2_num * 28, 64, 28)
     if fused_sp.type1 == fused_sp.type2
-      overlay.blt(88, 198, typebitmap.bitmap, t1_rect)
+      overlay.blt(85, 196, typebitmap.bitmap, t1_rect)
     else
-      overlay.blt(55, 198, typebitmap.bitmap, t1_rect)
-      overlay.blt(121, 198, typebitmap.bitmap, t2_rect)
+      overlay.blt(52, 196, typebitmap.bitmap, t1_rect)
+      overlay.blt(118, 196, typebitmap.bitmap, t2_rect)
     end
     typebitmap.dispose
 
     # Badge Custom / Autogen
-    if hasCustom
-      textpos << [_INTL("★ Custom Sprite dedicato!"), 120, 230, 2, Color.new(255, 215, 40), Color.new(120, 80, 0)]
-    else
-      textpos << [_INTL("Sprite Autogenerato"), 120, 230, 2, Color.new(180, 185, 195), label_shadow]
-    end
+    overlay.font.size = 16
+    badge_color = hasCustom ? Color.new(255, 215, 40) : Color.new(180, 185, 195)
+    badge_lbl = hasCustom ? _INTL("[Custom Sprite dedicato]") : _INTL("[Sprite Autogenerato]")
+    pbDrawTextPositions(overlay, [
+      [badge_lbl, 117, 226, 2, badge_color, Color.new(25, 30, 40)]
+    ])
 
-    # Dettaglio componenti Testa e Corpo
-    overlay.fill_rect(24, 250, 192, 76, Color.new(28, 36, 56))
-    textpos << [_INTL("Testa: {1}", head_sp.real_name), 30, 254, 0, Color.new(120, 210, 255), label_shadow]
-    head_t_str = GameData::Type.get(head_sp.type1).name
-    head_t_str += "/" + GameData::Type.get(head_sp.type2).name if head_sp.type1 != head_sp.type2
-    textpos << [sprintf("(Tipo: %s)", head_t_str), 30, 270, 0, Color.new(180, 190, 205), label_shadow]
+    # Componenti Testa e Corpo
+    overlay.fill_rect(18, 246, 198, 78, Color.new(16, 22, 36))
+    drawBoxBorder(overlay, 18, 246, 198, 78, Color.new(40, 55, 80))
 
-    textpos << [_INTL("Corpo: {1}", body_sp.real_name), 30, 288, 0, Color.new(255, 160, 120), label_shadow]
-    body_t_str = GameData::Type.get(body_sp.type1).name
-    body_t_str += "/" + GameData::Type.get(body_sp.type2).name if body_sp.type1 != body_sp.type2
-    textpos << [sprintf("(Tipo: %s)", body_t_str), 30, 304, 0, Color.new(180, 190, 205), label_shadow]
+    head_t = GameData::Type.get(head_sp.type1).name
+    head_t += "/" + GameData::Type.get(head_sp.type2).name if head_sp.type1 != head_sp.type2
+    body_t = GameData::Type.get(body_sp.type1).name
+    body_t += "/" + GameData::Type.get(body_sp.type2).name if body_sp.type1 != body_sp.type2
 
-    # PANNELLO DESTRO: Statistiche Base
-    overlay.fill_rect(228, 36, 260, 162, Color.new(28, 36, 56))
-    bst_col = (bst >= 500) ? Color.new(100, 245, 120) : Color.new(255, 220, 80)
-    textpos << [sprintf("STATISTICHE BASE (BST: %d)", bst), 358, 42, 2, bst_col, label_shadow]
+    overlay.font.size = 16
+    pbDrawTextPositions(overlay, [
+      [sprintf("Testa: %s", head_sp.real_name), 24, 248, 0, Color.new(120, 210, 255), Color.new(20, 40, 60)],
+      [sprintf(" (%s)", head_t), 24, 264, 0, Color.new(180, 190, 205), Color.new(20, 30, 40)],
+      [sprintf("Corpo: %s", body_sp.real_name), 24, 282, 0, Color.new(255, 170, 120), Color.new(60, 30, 20)],
+      [sprintf(" (%s)", body_t), 24, 298, 0, Color.new(180, 190, 205), Color.new(20, 30, 40)]
+    ])
+
+    # PANNELLO DESTRO SUPERIORE: Statistiche Base (x=228, y=38, w=272, h=150)
+    overlay.fill_rect(228, 38, 272, 150, Color.new(22, 28, 44))
+    drawBoxBorder(overlay, 228, 38, 272, 150, Color.new(50, 70, 100))
+
+    overlay.font.size = 18
+    bst_title_col = (bst >= 500) ? Color.new(100, 245, 120) : Color.new(255, 220, 80)
+    pbDrawTextPositions(overlay, [
+      [sprintf("STATISTICHE BASE (BST: %d)", bst), 364, 42, 2, bst_title_col, Color.new(30, 40, 50)]
+    ])
 
     stats_info = [
-      [:HP, _INTL("PS"), fused_sp.base_stats[:HP] || 0],
-      [:ATTACK, _INTL("Attacco"), fused_sp.base_stats[:ATTACK] || 0],
-      [:DEFENSE, _INTL("Difesa"), fused_sp.base_stats[:DEFENSE] || 0],
-      [:SPECIAL_ATTACK, _INTL("Att. Sp."), fused_sp.base_stats[:SPECIAL_ATTACK] || 0],
-      [:SPECIAL_DEFENSE, _INTL("Dif. Sp."), fused_sp.base_stats[:SPECIAL_DEFENSE] || 0],
-      [:SPEED, _INTL("Velocità"), fused_sp.base_stats[:SPEED] || 0]
+      [:HP, _INTL("PS"), (fused_sp.base_stats ? fused_sp.base_stats[:HP] : 0) || 0],
+      [:ATTACK, _INTL("Attacco"), (fused_sp.base_stats ? fused_sp.base_stats[:ATTACK] : 0) || 0],
+      [:DEFENSE, _INTL("Difesa"), (fused_sp.base_stats ? fused_sp.base_stats[:DEFENSE] : 0) || 0],
+      [:SPECIAL_ATTACK, _INTL("Att. Sp."), (fused_sp.base_stats ? fused_sp.base_stats[:SPECIAL_ATTACK] : 0) || 0],
+      [:SPECIAL_DEFENSE, _INTL("Dif. Sp."), (fused_sp.base_stats ? fused_sp.base_stats[:SPECIAL_DEFENSE] : 0) || 0],
+      [:SPEED, _INTL("Velocità"), (fused_sp.base_stats ? fused_sp.base_stats[:SPEED] : 0) || 0]
     ]
 
+    overlay.font.size = 16
+    stat_labels = []
     stats_info.each_with_index do |st, idx|
-      sy = 62 + (idx * 22)
-      textpos << [st[1], 236, sy, 0, label_base, label_shadow]
-      textpos << [sprintf("%3d", st[2]), 310, sy, 1, label_base, label_shadow]
+      sy = 62 + (idx * 20)
+      stat_labels << [st[1], 236, sy, 0, Color.new(220, 225, 235), Color.new(25, 30, 40)]
+      stat_labels << [sprintf("%3d", st[2]), 300, sy, 1, Color.new(255, 255, 255), Color.new(25, 30, 40)]
 
-      # Disegna barra grafica per la statistica
-      bar_x = 318
+      bar_x = 308
       bar_y = sy + 4
-      bar_w = 160
-      bar_h = 10
+      bar_w = 184
+      bar_h = 9
       bar_fill = [[(st[2] * bar_w / 180.0).round, bar_w].min, 2].max
-      overlay.fill_rect(bar_x, bar_y, bar_w, bar_h, Color.new(15, 20, 30))
-      fill_col = if st[2] >= 110
-                   Color.new(80, 230, 110)
-                 elsif st[2] >= 80
-                   Color.new(245, 215, 60)
-                 elsif st[2] >= 50
-                   Color.new(255, 150, 40)
-                 else
-                   Color.new(240, 80, 80)
-                 end
+      overlay.fill_rect(bar_x, bar_y, bar_w, bar_h, Color.new(12, 16, 24))
+      fill_col = Color.new(240, 80, 80)
+      if st[2] >= 110
+        fill_col = Color.new(80, 230, 110)
+      elsif st[2] >= 80
+        fill_col = Color.new(245, 215, 60)
+      elsif st[2] >= 50
+        fill_col = Color.new(255, 150, 40)
+      end
       overlay.fill_rect(bar_x + 1, bar_y + 1, bar_fill - 2, bar_h - 2, fill_col)
     end
+    pbDrawTextPositions(overlay, stat_labels)
 
-    # PANNELLO DESTRO: Abilità Possibili
-    overlay.fill_rect(228, 204, 260, 122, Color.new(28, 36, 56))
-    textpos << [_INTL("ABILITÀ POSSIBILI"), 358, 208, 2, Color.new(120, 220, 255), label_shadow]
+    # PANNELLO DESTRO INFERIORE: Abilità (x=228, y=192, w=272, h=138)
+    overlay.fill_rect(228, 192, 272, 138, Color.new(22, 28, 44))
+    drawBoxBorder(overlay, 228, 192, 272, 138, Color.new(50, 70, 100))
+
+    overlay.font.size = 18
+    pbDrawTextPositions(overlay, [
+      [_INTL("ABILITÀ DISPONIBILI"), 364, 196, 2, Color.new(120, 220, 255), Color.new(30, 40, 50)]
+    ])
 
     if fused_sp && fused_sp.abilities
       abil_list = fused_sp.abilities.map { |a| GameData::Ability.get(a) rescue nil }.compact.uniq
-      abil_y = 230
-      abil_list.first(3).each do |ab|
-        textpos << [ab.name, 236, abil_y, 0, Color.new(255, 225, 100), label_shadow]
+      ay = 216
+      abil_list.first(2).each do |ab|
+        overlay.font.size = 18
+        pbDrawTextPositions(overlay, [[ab.name, 236, ay, 0, Color.new(255, 225, 100), Color.new(40, 30, 10)]])
+        ay += 18
         desc = ab.description rescue ""
-        drawTextEx(overlay, 236, abil_y + 16, 244, 2, desc, Color.new(200, 205, 215), label_shadow)
-        abil_y += 30
+        overlay.font.size = 16
+        drawFormattedTextEx(overlay, 236, ay, 256, desc, Color.new(200, 210, 225), Color.new(25, 30, 40), 16)
+        ay += 38
       end
     end
 
-    # Barra Azioni in basso
-    overlay.fill_rect(8, 334, Graphics.width - 16, 38, Color.new(18, 24, 38))
-    textpos << [_INTL("[C / Invio]: Scegli questa fusione    |    [X / Z]: Torna alla selezione"), Graphics.width / 2, 344, 2, Color.new(120, 230, 255), label_shadow]
+    # Barra Azioni in basso (x=8, y=336, w=Graphics.width-16, h=38)
+    overlay.fill_rect(8, 336, Graphics.width - 16, 38, Color.new(26, 36, 56))
+    drawBoxBorder(overlay, 8, 336, Graphics.width - 16, 38, Color.new(50, 70, 100))
 
-    pbDrawTextPositions(overlay, textpos)
+    overlay.font.size = 18
+    pbDrawTextPositions(overlay, [
+      [_INTL("[C / Invio]: Scegli questa fusione    |    [X / Z]: Torna indietro"), Graphics.width / 2, 344, 2, Color.new(120, 230, 255), Color.new(20, 40, 60)]
+    ])
 
-    # Event loop per la visualizzazione della pagina
     result = :back
     loop do
       Graphics.update
@@ -466,9 +517,18 @@ class DoublePreviewScreen
       end
     end
 
-    overlay_sprite.dispose
-    detail_viewport.dispose
     return result
+  ensure
+    overlay_sprite.dispose if overlay_sprite && !overlay_sprite.disposed?
+    detail_viewport.dispose if detail_viewport && !detail_viewport.disposed?
+    showMainScreen
+  end
+
+  def drawBoxBorder(bitmap, x, y, width, height, color)
+    bitmap.fill_rect(x, y, width, 1, color)
+    bitmap.fill_rect(x, y + height - 1, width, 1, color)
+    bitmap.fill_rect(x, y, 1, height, color)
+    bitmap.fill_rect(x + width - 1, y, 1, height, color)
   end
 
   def initializeSelectArrow
@@ -485,6 +545,7 @@ class DoublePreviewScreen
     @sprites["evo"].x = EVO_BUTTON_X
     @sprites["evo"].y = EVO_BUTTON_Y
     @sprites["evo"].z = 100000
+    @sprites["evo"].visible = false
   end
 
   def initializeCancelButton
@@ -509,8 +570,10 @@ class DoublePreviewScreen
     @typewindows << viewport
     overlay = BitmapSprite.new(Graphics.width, Graphics.height, viewport).bitmap
     pbSetNarrowFont(overlay)
+    overlay.fill_rect(0, 362, Graphics.width, 22, Color.new(20, 25, 35, 230))
+    overlay.font.size = 18
     textpos = [
-      [_INTL("[C / Invio: Scegli]   [Z / Shift: Scheda Dettagli]   [X: Annulla]"), Graphics.width / 2, 362, 2, Color.new(225, 235, 245), Color.new(30, 40, 60)]
+      [_INTL("[C / Invio: Scegli]   [Z: Scheda Dettagli]   [X: Annulla]"), Graphics.width / 2, 364, 2, Color.new(225, 235, 245), Color.new(20, 30, 45)]
     ]
     pbDrawTextPositions(overlay, textpos)
   end
@@ -524,7 +587,6 @@ class DoublePreviewScreen
   end
 
   def drawSpriteInfoIcons(fusedPokemon, viewport)
-    # Placeholder per icone alt sprite
   end
 
   def dispose
