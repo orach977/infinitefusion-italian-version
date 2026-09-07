@@ -7,8 +7,8 @@ class DoublePreviewScreen
   attr_reader :sprite_left
   attr_reader :sprite_right
 
-  SELECT_ARROW_X_LEFT   = 100
-  SELECT_ARROW_X_RIGHT  = 350
+  SELECT_ARROW_X_LEFT   = 16
+  SELECT_ARROW_X_RIGHT  = 266
   SELECT_ARROW_X_CANCEL = 227
 
   SELECT_ARROW_Y_SELECT = 0
@@ -295,7 +295,7 @@ class DoublePreviewScreen
     info_positions << [sprintf("BST: %d", bst), x + 172, 258, 1, bst_color, label_shadow]
     pbDrawTextPositions(overlay, info_positions)
 
-    # 3. Badge Custom Sprite / Autogen e Hint Scheda Dettagli (font size 18)
+    # 3. Badge Custom Sprite / Autogen (font size 18)
     overlay.font.size = 18
     badge_positions = []
     if hasCustom
@@ -303,7 +303,6 @@ class DoublePreviewScreen
     else
       badge_positions << [_INTL("[Autogenerato]"), center_x, 276, 2, Color.new(180, 185, 195), Color.new(40, 45, 55)]
     end
-    badge_positions << [_INTL("[Z: Scheda Dettagli]"), center_x, 294, 2, Color.new(100, 220, 255), Color.new(20, 50, 90)]
     pbDrawTextPositions(overlay, badge_positions)
 
     drawSpriteInfoIcons(getPokemon(fusedDexNum), viewport) if @draw_sprite_info
@@ -590,10 +589,11 @@ class DoublePreviewScreen
     @typewindows << viewport
     overlay = BitmapSprite.new(Graphics.width, Graphics.height, viewport).bitmap
     pbSetSystemFont(overlay)
-    overlay.fill_rect(0, 362, Graphics.width, 22, Color.new(20, 25, 35, 230))
+    overlay.fill_rect(0, 348, Graphics.width, 1, Color.new(70, 100, 150))
+    overlay.fill_rect(0, 349, Graphics.width, 35, Color.new(18, 24, 38, 240))
     overlay.font.size = 18
     textpos = [
-      [_INTL("[C / Invio: Scegli]   [Z: Scheda Dettagli]   [X: Annulla]"), Graphics.width / 2, 364, 2, Color.new(225, 235, 245), Color.new(20, 30, 45)]
+      [_INTL("[C / Invio: Scegli]   [Z: Scheda Dettagli]   [X: Annulla]"), Graphics.width / 2, 350, 2, Color.new(225, 235, 245), Color.new(20, 30, 45)]
     ]
     pbDrawTextPositions(overlay, textpos)
   end

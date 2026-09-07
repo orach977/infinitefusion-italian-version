@@ -90,6 +90,20 @@ Tutti gli strumenti, rimedi, bacche e relative descrizioni degli effetti sono co
   <img src="docs/screenshots/borsa_bacche_it.png" alt="Borsa Bacche in italiano" width="48%">
 </p>
 
+### 🧬 Anteprima Fusione DNA Dettagliata
+Durante la fusione (o consultando il menù di anteprima con *Super giunzioni*), premi **Z** o **Shift** per aprire la scheda dettagli approfondita con statistiche base, BST calcolato, abilità trasmissibili, tipi e componenti:
+
+<p align="center">
+  <img src="docs/screenshots/anteprima_fusione_dettagli.png" alt="Scheda Dettagli Fusione con Chardos" width="85%">
+</p>
+
+### 📊 Visualizzatore IV, EV e Natura
+Nella schermata delle statistiche di qualsiasi Pokémon del team (Pagina 2 del riepilogo), premi **Z** o il tasto Azione per svelare istantaneamente i Valori Individuali (IV 0-31), i Punti Allenamento (EV 0-252) e le statistiche favorite dalla Natura:
+
+<p align="center">
+  <img src="docs/screenshots/riepilogo_iv_ev.png" alt="Visualizzatore IV, EV e Natura in gioco" width="85%">
+</p>
+
 ---
 
 ## 💻 Requisiti
