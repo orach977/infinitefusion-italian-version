@@ -197,7 +197,6 @@ class DoublePreviewScreen
 
     drawFusionInformation(dexNumber, level, x)
 
-    # Sprite sempre chiaramente visibile (rimosso silhouette pbSetColor)
     return previewwindow
   end
 
@@ -275,7 +274,7 @@ class DoublePreviewScreen
     bst = (fused_sp && fused_sp.base_stats) ? fused_sp.base_stats.values.sum : 0
 
     overlay = BitmapSprite.new(Graphics.width, Graphics.height, viewport).bitmap
-    pbSetNarrowFont(overlay)
+    pbSetSystemFont(overlay)
 
     label_base = Color.new(248, 248, 248)
     label_shadow = Color.new(30, 40, 50)
@@ -292,8 +291,8 @@ class DoublePreviewScreen
     overlay.font.size = 20
     info_positions = []
     bst_color = (bst >= 500) ? Color.new(100, 245, 120) : Color.new(255, 220, 80)
-    info_positions << [sprintf("Lv. %d", level), x + 24, 258, 0, label_base, label_shadow] if @draw_level
-    info_positions << [sprintf("BST: %d", bst), x + 168, 258, 1, bst_color, label_shadow]
+    info_positions << [sprintf("Lv. %d", level), x + 20, 258, 0, label_base, label_shadow] if @draw_level
+    info_positions << [sprintf("BST: %d", bst), x + 172, 258, 1, bst_color, label_shadow]
     pbDrawTextPositions(overlay, info_positions)
 
     # 3. Badge Custom Sprite / Autogen e Hint Scheda Dettagli (font size 18)
@@ -326,6 +325,23 @@ class DoublePreviewScreen
     @typewindows.each { |w| w.visible = true if w && !w.disposed? }
   end
 
+  def wrapText(bitmap, text, max_width)
+    words = text.to_s.split(" ")
+    lines = []
+    cur_line = ""
+    words.each do |word|
+      test = cur_line.empty? ? word : cur_line + " " + word
+      if bitmap.text_size(test).width <= max_width
+        cur_line = test
+      else
+        lines << cur_line unless cur_line.empty?
+        cur_line = word
+      end
+    end
+    lines << cur_line unless cur_line.empty?
+    return lines
+  end
+
   def pbShowDetailedPage(selected_index)
     dexNumber = (selected_index == 0) ? @fusion_dex_left : @fusion_dex_right
     return :back if !dexNumber
@@ -338,7 +354,7 @@ class DoublePreviewScreen
 
     overlay_sprite = BitmapSprite.new(Graphics.width, Graphics.height, detail_viewport)
     overlay = overlay_sprite.bitmap
-    pbSetNarrowFont(overlay)
+    pbSetSystemFont(overlay)
 
     body_id = getBodyID(dexNumber)
     head_id = getHeadID(dexNumber, body_id)
@@ -359,14 +375,14 @@ class DoublePreviewScreen
 
     # Barra del titolo in alto
     overlay.fill_rect(8, 8, Graphics.width - 16, 26, Color.new(26, 36, 56))
-    overlay.font.size = 20
+    overlay.font.size = 22
     pbDrawTextPositions(overlay, [
       [_INTL("SCHEDA DETTAGLI FUSIONE"), Graphics.width / 2, 10, 2, Color.new(255, 215, 60), Color.new(100, 70, 0)]
     ])
 
-    # PANNELLO SINISTRO (x=12, y=38, w=210, h=292)
-    overlay.fill_rect(12, 38, 210, 292, Color.new(22, 28, 44))
-    drawBoxBorder(overlay, 12, 38, 210, 292, Color.new(50, 70, 100))
+    # PANNELLO SINISTRO (x=12, y=38, w=210, h=294)
+    overlay.fill_rect(12, 38, 210, 294, Color.new(22, 28, 44))
+    drawBoxBorder(overlay, 12, 38, 210, 294, Color.new(50, 70, 100))
 
     # Nome Pokémon nel pannello sinistro
     overlay.font.size = 22
@@ -374,44 +390,44 @@ class DoublePreviewScreen
       [fused_sp.real_name, 117, 44, 2, Color.new(255, 255, 255), Color.new(25, 30, 40)]
     ])
 
-    # Sprite della fusione nel riquadro sinistro
-    overlay.fill_rect(37, 68, 160, 124, Color.new(12, 16, 26))
-    drawBoxBorder(overlay, 37, 68, 160, 124, Color.new(60, 80, 110))
+    # Sprite della fusione nel riquadro sinistro (x=37, y=68, w=160, h=108)
+    overlay.fill_rect(37, 68, 160, 108, Color.new(12, 16, 26))
+    drawBoxBorder(overlay, 37, 68, 160, 108, Color.new(60, 80, 110))
     sprite_bitmap = GameData::Species.front_sprite_bitmap(dexNumber)
     if sprite_bitmap
       sprite_bitmap.scale_bitmap(Settings::FRONTSPRITE_SCALE) rescue nil
       sw = sprite_bitmap.width
       sh = sprite_bitmap.height
       sx = 117 - (sw / 2)
-      sy = 68 + (124 - sh) / 2
+      sy = 68 + (108 - sh) / 2
       overlay.blt(sx, sy, sprite_bitmap.bitmap, Rect.new(0, 0, sw, sh))
     end
 
-    # Tipi sotto lo sprite
+    # Tipi sotto lo sprite a y=182 (termina a 210)
     typebitmap = AnimatedBitmap.new("Graphics/Pictures/types")
     t1_num = GameData::Type.get(fused_sp.type1).id_number
     t2_num = GameData::Type.get(fused_sp.type2).id_number
     t1_rect = Rect.new(0, t1_num * 28, 64, 28)
     t2_rect = Rect.new(0, t2_num * 28, 64, 28)
     if fused_sp.type1 == fused_sp.type2
-      overlay.blt(85, 196, typebitmap.bitmap, t1_rect)
+      overlay.blt(85, 182, typebitmap.bitmap, t1_rect)
     else
-      overlay.blt(52, 196, typebitmap.bitmap, t1_rect)
-      overlay.blt(118, 196, typebitmap.bitmap, t2_rect)
+      overlay.blt(52, 182, typebitmap.bitmap, t1_rect)
+      overlay.blt(118, 182, typebitmap.bitmap, t2_rect)
     end
     typebitmap.dispose
 
-    # Badge Custom / Autogen
+    # Badge Custom / Autogen a y=216 (spazio pulito tra tipi 210 e box 238)
     overlay.font.size = 16
     badge_color = hasCustom ? Color.new(255, 215, 40) : Color.new(180, 185, 195)
     badge_lbl = hasCustom ? _INTL("[Custom Sprite dedicato]") : _INTL("[Sprite Autogenerato]")
     pbDrawTextPositions(overlay, [
-      [badge_lbl, 117, 226, 2, badge_color, Color.new(25, 30, 40)]
+      [badge_lbl, 117, 216, 2, badge_color, Color.new(25, 30, 40)]
     ])
 
-    # Componenti Testa e Corpo
-    overlay.fill_rect(18, 246, 198, 78, Color.new(16, 22, 36))
-    drawBoxBorder(overlay, 18, 246, 198, 78, Color.new(40, 55, 80))
+    # Componenti Testa e Corpo (y=238..326)
+    overlay.fill_rect(18, 238, 198, 88, Color.new(16, 22, 36))
+    drawBoxBorder(overlay, 18, 238, 198, 88, Color.new(40, 55, 80))
 
     head_t = GameData::Type.get(head_sp.type1).name
     head_t += "/" + GameData::Type.get(head_sp.type2).name if head_sp.type1 != head_sp.type2
@@ -420,15 +436,15 @@ class DoublePreviewScreen
 
     overlay.font.size = 16
     pbDrawTextPositions(overlay, [
-      [sprintf("Testa: %s", head_sp.real_name), 24, 248, 0, Color.new(120, 210, 255), Color.new(20, 40, 60)],
-      [sprintf(" (%s)", head_t), 24, 264, 0, Color.new(180, 190, 205), Color.new(20, 30, 40)],
-      [sprintf("Corpo: %s", body_sp.real_name), 24, 282, 0, Color.new(255, 170, 120), Color.new(60, 30, 20)],
-      [sprintf(" (%s)", body_t), 24, 298, 0, Color.new(180, 190, 205), Color.new(20, 30, 40)]
+      [sprintf("Testa: %s", head_sp.real_name), 24, 244, 0, Color.new(120, 210, 255), Color.new(20, 40, 60)],
+      [sprintf(" (Tipo: %s)", head_t), 24, 262, 0, Color.new(180, 190, 205), Color.new(20, 30, 40)],
+      [sprintf("Corpo: %s", body_sp.real_name), 24, 284, 0, Color.new(255, 170, 120), Color.new(60, 30, 20)],
+      [sprintf(" (Tipo: %s)", body_t), 24, 302, 0, Color.new(180, 190, 205), Color.new(20, 30, 40)]
     ])
 
-    # PANNELLO DESTRO SUPERIORE: Statistiche Base (x=228, y=38, w=272, h=150)
-    overlay.fill_rect(228, 38, 272, 150, Color.new(22, 28, 44))
-    drawBoxBorder(overlay, 228, 38, 272, 150, Color.new(50, 70, 100))
+    # PANNELLO DESTRO SUPERIORE: Statistiche Base (x=228, y=38, w=272, h=148)
+    overlay.fill_rect(228, 38, 272, 148, Color.new(22, 28, 44))
+    drawBoxBorder(overlay, 228, 38, 272, 148, Color.new(50, 70, 100))
 
     overlay.font.size = 18
     bst_title_col = (bst >= 500) ? Color.new(100, 245, 120) : Color.new(255, 220, 80)
@@ -445,16 +461,16 @@ class DoublePreviewScreen
       [:SPEED, _INTL("Velocità"), (fused_sp.base_stats ? fused_sp.base_stats[:SPEED] : 0) || 0]
     ]
 
-    overlay.font.size = 16
+    overlay.font.size = 18
     stat_labels = []
     stats_info.each_with_index do |st, idx|
       sy = 62 + (idx * 20)
       stat_labels << [st[1], 236, sy, 0, Color.new(220, 225, 235), Color.new(25, 30, 40)]
-      stat_labels << [sprintf("%3d", st[2]), 300, sy, 1, Color.new(255, 255, 255), Color.new(25, 30, 40)]
+      stat_labels << [sprintf("%3d", st[2]), 330, sy, 1, Color.new(255, 255, 255), Color.new(25, 30, 40)]
 
-      bar_x = 308
+      bar_x = 340
       bar_y = sy + 4
-      bar_w = 184
+      bar_w = 150
       bar_h = 9
       bar_fill = [[(st[2] * bar_w / 180.0).round, bar_w].min, 2].max
       overlay.fill_rect(bar_x, bar_y, bar_w, bar_h, Color.new(12, 16, 24))
@@ -470,13 +486,13 @@ class DoublePreviewScreen
     end
     pbDrawTextPositions(overlay, stat_labels)
 
-    # PANNELLO DESTRO INFERIORE: Abilità (x=228, y=192, w=272, h=138)
-    overlay.fill_rect(228, 192, 272, 138, Color.new(22, 28, 44))
-    drawBoxBorder(overlay, 228, 192, 272, 138, Color.new(50, 70, 100))
+    # PANNELLO DESTRO INFERIORE: Abilità (x=228, y=190, w=272, h=142)
+    overlay.fill_rect(228, 190, 272, 142, Color.new(22, 28, 44))
+    drawBoxBorder(overlay, 228, 190, 272, 142, Color.new(50, 70, 100))
 
     overlay.font.size = 18
     pbDrawTextPositions(overlay, [
-      [_INTL("ABILITÀ DISPONIBILI"), 364, 196, 2, Color.new(120, 220, 255), Color.new(30, 40, 50)]
+      [_INTL("ABILITÀ DISPONIBILI"), 364, 194, 2, Color.new(120, 220, 255), Color.new(30, 40, 50)]
     ])
 
     if fused_sp && fused_sp.abilities
@@ -488,8 +504,12 @@ class DoublePreviewScreen
         ay += 18
         desc = ab.description rescue ""
         overlay.font.size = 16
-        drawFormattedTextEx(overlay, 236, ay, 256, desc, Color.new(200, 210, 225), Color.new(25, 30, 40), 16)
-        ay += 38
+        lines = wrapText(overlay, desc, 258)
+        lines.each do |line|
+          pbDrawTextPositions(overlay, [[line, 236, ay, 0, Color.new(205, 215, 230), Color.new(25, 30, 40)]])
+          ay += 16
+        end
+        ay += 6
       end
     end
 
@@ -569,7 +589,7 @@ class DoublePreviewScreen
     viewport.z = 100003
     @typewindows << viewport
     overlay = BitmapSprite.new(Graphics.width, Graphics.height, viewport).bitmap
-    pbSetNarrowFont(overlay)
+    pbSetSystemFont(overlay)
     overlay.fill_rect(0, 362, Graphics.width, 22, Color.new(20, 25, 35, 230))
     overlay.font.size = 18
     textpos = [

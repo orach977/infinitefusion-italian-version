@@ -276,15 +276,15 @@ class FightMenuDisplay < BattleMenuBase
       @pokemon_name_overlay = BitmapSprite.new(Graphics.width, Graphics.height-self.y, viewport)
       @pokemon_name_overlay.x = self.x
       @pokemon_name_overlay.y = self.y
-      pbSetNarrowFont(@pokemon_name_overlay.bitmap)
+      pbSetSystemFont(@pokemon_name_overlay.bitmap)
       @pokemon_name_overlay.bitmap.font.size = 22
       addSprite("overlay", @pokemon_name_overlay)
       # Create overlay for selected move's info (shows move's PP)
       @infoOverlay = BitmapSprite.new(Graphics.width,Graphics.height-self.y,viewport)
       @infoOverlay.x = self.x
       @infoOverlay.y = self.y
-      pbSetNarrowFont(@infoOverlay.bitmap)
-      @infoOverlay.bitmap.font.size = 22
+      pbSetSystemFont(@infoOverlay.bitmap)
+      @infoOverlay.bitmap.font.size = 24
       addSprite("infoOverlay",@infoOverlay)
       # Create type icon
       @typeIcon = SpriteWrapper.new(viewport)
@@ -428,16 +428,16 @@ class FightMenuDisplay < BattleMenuBase
     end
     # Draw move names onto overlay
     @pokemon_name_overlay.bitmap.clear
-    pbSetNarrowFont(@pokemon_name_overlay.bitmap)
+    pbSetSystemFont(@pokemon_name_overlay.bitmap)
     @pokemon_name_overlay.bitmap.font.size = 22
     textPos = []
     @buttons.each_with_index do |button,i|
       next if !@visibility["button_#{i}"]
       bx = button.x - self.x
       by = button.y - self.y
-      name_x = bx + 16
+      name_x = bx + 18
       badge_x = bx + 172
-      y = by + 10
+      y = by + 4
       moveNameBase = TEXT_BASE_COLOR
       if moves[i].type
         # NOTE: This takes a colour from a particular pixel in the button
@@ -497,8 +497,8 @@ class FightMenuDisplay < BattleMenuBase
       return
     end
     @infoOverlay.bitmap.clear
-    pbSetNarrowFont(@infoOverlay.bitmap)
-    @infoOverlay.bitmap.font.size = 22
+    pbSetSystemFont(@infoOverlay.bitmap)
+    @infoOverlay.bitmap.font.size = 24
     if !move
       @visibility["typeIcon"] = false
       return
@@ -519,7 +519,7 @@ class FightMenuDisplay < BattleMenuBase
       end
 
       textPos.push([_INTL("PP: {1}/{2}",move.pp,move.total_pp),
-         448,40,2,ppColorBase,ppColorShadow])
+         448,36,2,ppColorBase,ppColorShadow])
     end
     # Dettaglio efficacia nell'overlay destro (centrato nel riquadro bianco)
     eff = getEffectivenessData(move)
@@ -529,7 +529,7 @@ class FightMenuDisplay < BattleMenuBase
       if isDarkMode
         effBase, effShadow = effShadow, effBase
       end
-      textPos.push([eff[:full], 448, 60, 2, effBase, effShadow])
+      textPos.push([eff[:full], 448, 56, 2, effBase, effShadow])
     end
     pbDrawTextPositions(@infoOverlay.bitmap,textPos) if textPos.length > 0
   end
