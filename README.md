@@ -425,6 +425,10 @@ Il gioco include un sistema di randomizzazione degli incontri selvatici. Quando 
 
 Questa versione sblocca ed estende all'intero gioco (Kanto, Johto e Hoenn) il sistema di **Overworld Encounters**:
 
+<p align="center">
+  <img src="docs/screenshots/overworld_encounters.png" alt="Incontri Pokémon e fusioni a vista nell'Overworld" width="85%">
+</p>
+
 - **Spawn fisici sulla mappa**: I Pokémon selvatici appaiono e camminano nell'erba alta, nelle caverne e sulle superfici acquatiche con i rispettivi sprite overworld.
 - **Comportamenti dinamici e IA**:
   - *Curiosi*: ti notano con un punto interrogativo `?` e si avvicinano incuriositi.
