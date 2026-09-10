@@ -21,8 +21,56 @@ class OverworldPokemonEvent < Game_Event
   CASTFORM_FORMS = [:CASTFORM, :CASTFORM_SUNNY, :CASTFORM_RAINY, :CASTFORM_SNOWY]
   UPDATE_TIME = 4 # Nb. of frames for the update_behavior loop
 
+  def initialize(map_id, event, map = nil)
+    if event && event.pages
+      clean_pages = []
+      event.pages.each do |p|
+        new_p = p.clone
+        new_p.trigger = 0 if new_p.trigger == 4 || new_p.trigger == 3
+        new_p.list = [RPG::EventCommand.new(0, 0, [])]
+        clean_pages << new_p
+      end
+      event.pages = clean_pages
+    end
+    super(map_id, event, map)
+    @trigger = 0
+    @interpreter = nil
+    @list = [RPG::EventCommand.new(0, 0, [])]
+  end
+
+  def refresh
+    super
+    @trigger = 0
+    @interpreter = nil
+    @list = [RPG::EventCommand.new(0, 0, [])]
+  end
+
+  def start
+    return if $PokemonTemp.prevent_ow_battles
+    return if instance_variable_get(:@_triggered)
+    return if $PokemonTemp.overworld_wild_battle_triggered
+    unless @current_state == :NOTICED_PLAYER || @noticed_player_once
+      if @last_facing_direction == $game_player.direction
+        setBattleRule("surprise")
+        set_noticed_sprite
+        playAnimation(Settings::EXCLAMATION_ANIMATION_ID, @x, @y)
+        pbSEPlay("jump")
+        turn_away_from_player
+        jump(0, 0)
+        pbWait(8)
+        set_roaming_sprite
+        $Trainer.stats&.incr_nb_pokemon_surprised
+        check_offguard_challenge(self)
+      end
+    end
+    overworldPokemonBattle
+  end
+
   def setup_pokemon(species, level, terrain, behavior_roaming = nil, behavior_noticed = nil)
     # return unless @map_id == $game_map.map_id
+    @trigger = 0
+    @interpreter = nil
+    @list = [RPG::EventCommand.new(0, 0, [])]
     @species = species
     @level = level
     roll_for_special_encounters
