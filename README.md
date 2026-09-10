@@ -25,6 +25,7 @@
 - [Aggiornamento](#-aggiornamento)
 - [Come giocare](#-come-giocare)
 - [Radar Habitat — Guida completa](#-radar-habitat--guida-completa)
+- [Incontri a vista nell'Overworld](#-incontri-a-vista-nelloverworld)
 - [Pokédex HTML offline](#-pokédex-html-offline)
 - [Remaster grafico con Magpie](#-remaster-grafico-con-magpie)
 - [Randomizer integrato](#-randomizer-integrato)
@@ -56,6 +57,7 @@ Per garantire la massima trasparenza verso giocatori e appassionati, la seguente
 | **Efficacia Mosse in Battaglia** | ❌ Assente | 🟢 **Integrata in tempo reale** | Durante la lotta, ogni mossa mostra un badge calcolato in tempo reale contro il tipo avversario (*Superefficace x2/x4, Efficace, Poco eff., Immune*) |
 | **Visualizzatore IV, EV e Natura** | ❌ Nascosti / Non consultabili | 🟢 **Integrato nel Riepilogo** | Tasto Azione [Z] nella Pagina Competenze del Pokémon per visualizzare IV (0-31), EV (0-252/510) e modificatori positivi/negativi della Natura |
 | **Anteprima Fusione DNA Avanzata** | ⚠️ Scheda base essenziale | 🟢 **Confronto a 2 Colonne Completo** | Anteprima a doppio esito (A+B vs B+A), calcolo BST, ruoli Testa/Corpo, abilità trasmissibili, statistiche base e badge ★ Custom Sprite |
+| **Incontri a Vista (Overworld Encounters)** | ⚠️ Bloccati a Kanto (Solo Hoenn) | 🟢 **Sbloccati per l'intero gioco** | I Pokémon selvatici compaiono e si muovono fisicamente sulla mappa (erba, grotte, acqua) con comportamenti dinamici, Shiny visibili a vista con scintille e toggle On/Off nelle Opzioni |
 | **Pokédex Web Offline** | ❌ Assente | 🟢 **Incluso (`pokedex.html`)** | Pokédex interattivo standalone per browser senza connessione internet; include tutti i 576 Pokémon base con statistiche, tipi e filtri habitat |
 | **Remaster Grafico GPU (Magpie)** | ❌ Assente (Solo scaling pixel nativo) | 🟢 **Preconfigurato con 7 Profili** | Launcher `Avvia_Con_Remaster.bat` con Magpie DirectX 11 / HLSL (xBRZ 4x, MMPX, CAS) e risoluzione nativa 1x forzata all'avvio |
 | **Installatore & Auto-Update 1-Click** | ⚠️ Download manuale / Rischio conflitti | 🟢 **Script Automatico (`INSTALL_OR_UPDATE.bat`)** | Con Git embedded portatile: scarica, aggiorna o sincronizza il gioco con un click mantenendo sempre intatti i salvataggi in `%APPDATA%` |
@@ -111,6 +113,12 @@ Tutto ciò che segue è stato **interamente progettato, programmato, tradotto o 
 9. **Fix Architetturali dell'Engine RGSS**:
    - Correzione dei crash dell'interprete Ruby su stringhe italiane contenenti simboli `%` o apostrofi speciali.
    - Ripristino e allineamento dei font authentic (`Power Green`), eliminando caratteri mancanti o quadrati bianchi `[]`.
+10. **Incontri a Vista nell'Overworld (Overworld Encounters sbloccati)**:
+    - Sbloccato e ottimizzato il motore di spawn a vista per l'intero gioco (Kanto, Johto e Hoenn), superando il vecchio blocco della versione vanilla.
+    - I Pokémon selvatici appaiono e si muovono fisicamente su percorsi, caverne e superfici d'acqua con comportamenti specifici (curiosi, aggressivi, fuggiaschi o statici).
+    - **Shiny a vista**: i Pokémon cromatici brillano con animazione e segnale acustico prima ancora di iniziare la lotta.
+    - **Reazione al Repellente**: usando un Repellente i Pokémon selvatici fuggono alla vista del giocatore.
+    - **Opzione Toggle In-Game**: voce *"Overworld Encounters"* sempre disponibile nelle **Opzioni di Gioco** (`On` / `Off`), abilitata di default e con salvataggio persistente dello stato.
 
 ---
 
@@ -410,6 +418,25 @@ Il gioco include un sistema di randomizzazione degli incontri selvatici. Quando 
 - Gli incontri selvatici vengono mescolati
 - Il **Radar Habitat** si aggiorna automaticamente per mostrare i Pokémon randomizzati
 - I dati del randomizer sono salvati in `Data/encounters_randomized.dat`
+
+---
+
+## 🐾 Incontri a vista nell'Overworld
+
+Questa versione sblocca ed estende all'intero gioco (Kanto, Johto e Hoenn) il sistema di **Overworld Encounters**:
+
+- **Spawn fisici sulla mappa**: I Pokémon selvatici appaiono e camminano nell'erba alta, nelle caverne e sulle superfici acquatiche con i rispettivi sprite overworld.
+- **Comportamenti dinamici e IA**:
+  - *Curiosi*: ti notano con un punto interrogativo `?` e si avvicinano incuriositi.
+  - *Aggressivi*: ti caricano con un punto esclamativo `!` o arrabbiato.
+  - *Fuggiaschi*: scappano rapidamente se provi ad avvicinarti.
+  - *Statici*: rimangono fermi nel loro punto di spawn (es. bozzoli come Metapod o Kakuna).
+- **Shiny cromatici a vista**: Se un Pokémon selvatico è Shiny, emette il caratteristico scintillio sonoro e visivo direttamente sulla mappa prima ancora di entrare in battaglia!
+- **Effetto Repellente**: Con un Repellente attivo, i Pokémon selvatici scappano impauriti quando ti avvicini invece di iniziare la lotta.
+- **Attivazione / Disattivazione facile**:
+  - L'opzione è **attiva per impostazione predefinita**.
+  - Puoi disattivarla o riattivarla liberamente in qualsiasi momento da:  
+    `Menu di Pausa` → **Opzioni** → **Opzioni di Gioco** → **Overworld Encounters** (`On` / `Off`).
 
 ---
 

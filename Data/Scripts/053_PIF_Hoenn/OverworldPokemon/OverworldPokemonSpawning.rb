@@ -242,7 +242,7 @@ end
 
 Events.onStepTaken += proc { |sender, e|
   next unless $scene.is_a?(Scene_Map)
-  next unless Settings::GAME_ID == :IF_HOENN
+  next unless $PokemonSystem && $PokemonSystem.overworld_encounters
   next if isRepelActive()
   if should_spawn_overworld_pokemon?
     spawn_random_overworld_pokemon_group
@@ -250,7 +250,6 @@ Events.onStepTaken += proc { |sender, e|
 }
 
 Events.onMapChanging += proc { |_sender, e|
-  next unless Settings::HOENN
   clearOverworldPokemon
 }
 

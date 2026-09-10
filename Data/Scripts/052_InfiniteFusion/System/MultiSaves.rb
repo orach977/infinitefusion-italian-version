@@ -55,7 +55,10 @@ def onLoadExistingGame()
   clear_all_images()
   loadDateSpecificChanges()
   checkGameVersionUpdate()
-  $PokemonSystem.overworld_encounters = false if Settings::KANTO
+  if !$PokemonSystem.instance_variable_defined?(:@overworld_encounters_initialized)
+    $PokemonSystem.overworld_encounters = true
+    $PokemonSystem.instance_variable_set(:@overworld_encounters_initialized, true)
+  end
 end
 
 def checkGameVersionUpdate
@@ -84,8 +87,8 @@ def onStartingNewGame()
 end
 
 def set_starting_options
+  $PokemonSystem.overworld_encounters = true
   if Settings::HOENN
-    $PokemonSystem.overworld_encounters= true
     $PokemonSystem.use_generated_dex_entries=true
     $PokemonGlobal.runningShoes=true
   end
