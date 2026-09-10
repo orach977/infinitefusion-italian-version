@@ -45,56 +45,56 @@ end
 
 def trigger_overworld_wild_battle
   return if $PokemonTemp.overworld_wild_battle_triggered
+  return if !$PokemonTemp.overworld_wild_battle_participants || $PokemonTemp.overworld_wild_battle_participants.empty?
   $PokemonTemp.overworld_wild_battle_triggered = true
-  case $PokemonTemp.overworld_wild_battle_participants.length
-  when 0
-    $PokemonTemp.overworld_wild_battle_triggered = false
-    return
-  when 2
-    battler1 = $PokemonTemp.overworld_wild_battle_participants[0].pokemon
-    battler2 = $PokemonTemp.overworld_wild_battle_participants[1].pokemon
-    should_fuse = rand(100) <= MULTIPLE_WILD_OW_FUSE_CHANCE
-    should_fuse = false if battler1.isFusion? || battler2.isFusion? #&& rand(100) <= MULTIPLE_WILD_OW_FUSE_CHANCE
-    should_fuse = false if battler1.shiny? || battler2.shiny?
-    if should_fuse
-      fusion_species = fusionOf(battler1.species, battler2.species)
-      fusion_level = (battler1.level + battler2.level) / 2.ceil
-      fuse_wild_pokemon_animation(battler1, battler2)
-      checkWildFusePokemonChallenge(battler1, battler2)
-      pbWildBattleSpecific(Pokemon.new(fusion_species, fusion_level))
-    else
-      pb1v2WildBattleSpecific(battler1, battler2)
-    end
-  when 3
-    battler1 = $PokemonTemp.overworld_wild_battle_participants[0].pokemon
-    battler2 = $PokemonTemp.overworld_wild_battle_participants[1].pokemon
-    battler3 = $PokemonTemp.overworld_wild_battle_participants[2].pokemon
-    pb1v3WildBattleSpecific(battler1, battler2, battler3)
-  when 1
-    battler = $PokemonTemp.overworld_wild_battle_participants[0].pokemon
-    if isWeatherWind?()
-      event_x = $PokemonTemp.overworld_wild_battle_participants[0].x
-      if event_x && event_x > $game_player.x
-        $PokemonTemp.recordBattleRule("windside", 1)  #event to the right of player. Tailwind for event
-      elsif event_x && event_x < $game_player.x
-        $PokemonTemp.recordBattleRule("windside", 0) #player to the right of event. Tailwind for player
+  begin
+    case $PokemonTemp.overworld_wild_battle_participants.length
+    when 0
+      return
+    when 2
+      battler1 = $PokemonTemp.overworld_wild_battle_participants[0].pokemon
+      battler2 = $PokemonTemp.overworld_wild_battle_participants[1].pokemon
+      should_fuse = rand(100) <= MULTIPLE_WILD_OW_FUSE_CHANCE
+      should_fuse = false if battler1.isFusion? || battler2.isFusion? #&& rand(100) <= MULTIPLE_WILD_OW_FUSE_CHANCE
+      should_fuse = false if battler1.shiny? || battler2.shiny?
+      if should_fuse
+        fusion_species = fusionOf(battler1.species, battler2.species)
+        fusion_level = (battler1.level + battler2.level) / 2.ceil
+        fuse_wild_pokemon_animation(battler1, battler2)
+        checkWildFusePokemonChallenge(battler1, battler2)
+        pbWildBattleSpecific(Pokemon.new(fusion_species, fusion_level))
+      else
+        pb1v2WildBattleSpecific(battler1, battler2)
       end
+    when 3
+      battler1 = $PokemonTemp.overworld_wild_battle_participants[0].pokemon
+      battler2 = $PokemonTemp.overworld_wild_battle_participants[1].pokemon
+      battler3 = $PokemonTemp.overworld_wild_battle_participants[2].pokemon
+      pb1v3WildBattleSpecific(battler1, battler2, battler3)
+    when 1
+      battler = $PokemonTemp.overworld_wild_battle_participants[0].pokemon
+      if isWeatherWind?()
+        event_x = $PokemonTemp.overworld_wild_battle_participants[0].x
+        if event_x && event_x > $game_player.x
+          $PokemonTemp.recordBattleRule("windside", 1)  #event to the right of player. Tailwind for event
+        elsif event_x && event_x < $game_player.x
+          $PokemonTemp.recordBattleRule("windside", 0) #player to the right of event. Tailwind for player
+        end
+      end
+      pbWildBattleSpecific(battler)
+    else
+      # shouldn"t happen
+      battler = $PokemonTemp.overworld_wild_battle_participants[0].pokemon
+      pbWildBattleSpecific(battler)
+      $PokemonTemp.overworld_wild_battle_participants.shift
     end
-    pbWildBattleSpecific(battler)
-  else
-    # shouldn"t happen
-    battler = $PokemonTemp.overworld_wild_battle_participants[0].pokemon
-    pbWildBattleSpecific(battler)
-    $PokemonTemp.overworld_wild_battle_participants.shift
+  ensure
+    $PokemonTemp.overworld_wild_battle_participants&.each do |ow_pokemon|
+      ow_pokemon.despawn rescue nil
+    end
+    $PokemonTemp.overworld_wild_battle_participants = []
+    $PokemonTemp.overworld_wild_battle_triggered = false
   end
-
-  $PokemonTemp.overworld_wild_battle_participants.each do |ow_pokemon|
-    ow_pokemon.despawn
-  end
-  $PokemonTemp.overworld_wild_battle_participants = []
-
-  $PokemonTemp.overworld_wild_battle_triggered = false
-
 end
 
 def overworldPokemonCatchOffGuard()
